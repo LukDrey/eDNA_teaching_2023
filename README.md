@@ -68,7 +68,7 @@ multiqc FASTQC -o FASTQC --interactive
 
 ```
 
-  2. What are the important variables in the Quality report? What differences do you notice between the two files?
+> :memo: **Question 2:** What are the important variables in the Quality report? What differences do you notice between the two files?
 
 # 3. Demultiplexing
   * we need the barcodes to distinguish the samples 
@@ -127,7 +127,7 @@ cutadapt \
 conda deactivate 
 ```
 
-  3. Which differences do you notice between the two cutadapt commands? And why do we need to use two different commands? 
+> :memo: **Question 3:** Which differences do you notice between the two cutadapt commands? And why do we need to use two different commands? 
   
   * we had two passes through cutadapt so we need to merge the files 
 
@@ -174,7 +174,7 @@ grep -c '^>' *.fa | less
 
 ```
 
-  4. What is the difference between FASTQ and FASTA files? 
+> :memo: **Question 4:** What is the difference between FASTQ and FASTA files? 
   
 Now merge the two files. 
 
@@ -282,7 +282,7 @@ rbind(FWD.ForwardReads = sapply(FWD.orients, primerHits, fn = fnFs.filtN[[1]]),
 
 ```
   
-  5. How many reads still contain primer sequences? 
+> :memo: **Question 5:** How many reads still contain primer sequences? 
 
 Move out of R and into the terminal again. 
 Go through a second pass of cutadapt to remove the remaining primers. 
@@ -330,7 +330,7 @@ conda deactivate
 cd ../..
 
 ```
-  6. How does the cutadapt call for the demultiplexing step differ from the primer removal? 
+> :memo: **Question 6:** How does the cutadapt call for the demultiplexing step differ from the primer removal? 
   
 Now we check for primers again. 
 
@@ -396,7 +396,7 @@ rbind(FWD.ForwardReads = sapply(FWD.orients, primerHits, fn = fnFs.filtN[[1]]),
 
 ```
 
-  7. Was the primer removal successful? Or do we need to go through cutadapt again? 
+> :memo: **Question 7:** Was the primer removal successful? Or do we need to go through cutadapt again? 
 
 # 5. Sample inference with DADA2
 
@@ -499,7 +499,7 @@ names(derepRs_3) <- sample.names
 
 ```
 
-  8. Why do we need to do everything three times? 
+> :memo: **Question 8:** Why do we need to do everything three times? 
 
 Run the DADA2 core for sample inference (i.e. call the ASVs). 
   
@@ -544,7 +544,7 @@ seqtab_3.nochim <- removeBimeraDenovo(seqtab_3, method="consensus", multithread=
 
 ```
 
-  9. What are chimeric sequences? 
+> :memo: **Question 9:** What are chimeric sequences? 
 
 Because our reads are in mixed orientation we need to check for artificial diversity. 
 
@@ -607,7 +607,7 @@ for (i in 1:dim(seqtab_merge.nochim)[2]) {
 
 ```
 
-  10. What is the range of the sequence length of our amplicons? 
+> :memo: **Question 10:** What is the range of the sequence length of our amplicons? 
   
 Track our reads through the pipeline so we can see how many reads are filtered out. 
 
@@ -637,7 +637,7 @@ head(track_3)
 
 ```
 
-  11. How many sequences did we loose at each step? 
+> :memo: **Question 11:** How many sequences did we loose at each step? 
   
 Now we go on to save our data. 
 
@@ -760,7 +760,7 @@ ps_fungi_decontam <- phyloseq::phyloseq(ASV_fungi_decontam, sampledata_fungi_dec
 ps_fungi_decontam
 ```
 
-  12. How many ASVs does our dataset contain before filtering out contaminants?
+> :memo: **Question 12:** How many ASVs does our dataset contain before filtering out contaminants?
   
 Run the decontamination algorithm. 
 
@@ -792,9 +792,9 @@ ps_fungi_noncontam_pruned <- phyloseq::prune_taxa(phyloseq::taxa_sums(ps_fungi_n
                                         ps_fungi_noncontam)
 ```
 
-  13. Which taxa were removed from the original datasets as contaminants? 
-  14. How many taxa remain after this step?
-  15. What is the difference between the frequency, prevalence and combined approach in the decontam function?
+> :memo: **Question 13:** Which taxa were removed from the original datasets as contaminants? 
+> :memo: **Question 14:** How many taxa remain after this step?
+> :memo: **Question 15:** What is the difference between the frequency, prevalence and combined approach in the decontam function?
   
 ## LULU curation
 
@@ -816,9 +816,9 @@ ASV_table_fungi_cur$discarded_count
 
 ```
 
-  16. How many reads were merged? 
-  17. Which parameters does the LULU algorithm consider in it's merging? 
-  18. What are the default parameters? 
+> :memo: **Question 16:** How many reads were merged? 
+> :memo: **Question 17:** Which parameters does the LULU algorithm consider in it's merging? 
+> :memo: **Question 18:** What are the default parameters? 
   
 # Diversity Analysis
 
@@ -914,7 +914,7 @@ full_physeq <- phyloseq::phyloseq(ASV, TAX, sampledata)
 
 ```
 
-  19. How many taxa does our phyloseq object contain now? 
+> :memo: **Question 19:** How many taxa does our phyloseq object contain now? 
   
 For our analysis we want to focus on the differences between soil and bark samples as well as differences between coniferous and deciduous trees. So we need to do a lot of splitting and filtering of the phyloseq objects. The coniferous tree species is not the same in the two regions of interest. It is *Picea abies* (Norway Spruce) in the Swabian Alb and *Pinus sylvestris* (Scots pine) in Schorfheide-Chorin, so we need to treat them differently. 
 
@@ -1002,7 +1002,7 @@ physeq_sch_soil_pinus <- phyloseq::subset_samples(physeq_sch_soil, dominant_tree
 
 ```
 
-  20. How many taxa do the different splits contain? Make a little table. 
+> :memo: **Question 20:** How many taxa do the different splits contain? Make a little table. 
   
 # 10. Analysis of library sizes
 
@@ -1042,7 +1042,7 @@ combined_rare_curves
 
 ```
 
-  21. What differences can we see from these rarefaction curves?
+> :memo: **Question 21:** What differences can we see from these rarefaction curves?
   
 # 12. Community Composition
 
@@ -1450,10 +1450,10 @@ vegan::permutest(dispr_tree_sch)
 
 ```
 
-  22. What other options can you find for distance measures between samples? 
-  23. Are there other ordination methods apart from NMDS? 
-  24. What about the compositionality of the sequencing data? 
-  25. Are there statistically meaningful differences between substrates? Between tree species? 
+> :memo: **Question 22:** What other options can you find for distance measures between samples? 
+> :memo: **Question 23:** Are there other ordination methods apart from NMDS? 
+> :memo: **Question 24:** What about the compositionality of the sequencing data? 
+> :memo: **Question 25:** Are there statistically meaningful differences between substrates? Between tree species? 
 
   
   
