@@ -48,7 +48,7 @@ If you want to know more about what this means and how to create and use differe
 
 Normally, you would begin by trimming the Illumina sequencing adapters from the raw sequence data. Luckily for us, the sequencing provider has already done this, and  we can skip this part in our pipeline. The most common tool used for trimming Illumina Sequencing data is [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic), which was also used for our data. 
 
-<center><p style="color:blue">1. What are sequencing adapters and why do we need to remove them?</p></center>
+<center>1. What are sequencing adapters and why do we need to remove them?</center>
   
 # 2. Quality Reports
 
