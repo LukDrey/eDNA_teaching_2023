@@ -48,57 +48,72 @@ Normally, you would begin by trimming the Illumina sequencing adapters from the 
   
 # 2. Quality Reports
 
+Set the filepath to the location of the raw reads. 
 ```{bash, eval = F}
-# Set the filepath to the location of the raw reads. 
 cd /YOUR/FILEPATH/HERE/
+```
 
-# Create a subdirectory to store the FASTQC reports.
+Create a subdirectory to store the FASTQC reports.
+```{bash, eval = F}
 mkdir ./FASTQC
+```
 
-# Create a fastqc report of the read files, to examine the read quality.
+Create a fastqc report of the read files, in order to examine the read quality.
+```{bash, eval = F}
 fastqc 211103_SN234_A_L001_AUXV-4_AdapterTrimmed_R1.fastq.gz -o ./FASTQC &&
 fastqc 211103_SN234_A_L001_AUXV-4_AdapterTrimmed_R2.fastq.gz -o ./FASTQC
+```
 
-# Create a multiqc report to have both quality reports in one html file.
+Create a multiqc report to have both quality reports in one html file.
+```{bash, eval = F}
 multiqc FASTQC -o FASTQC --interactive
-
 ```
 
 > :memo: **Question 2:** What are the important variables in the Quality report? What differences do you notice between the two files?
 
 # 3. Demultiplexing
   * we need the barcodes to distinguish the samples 
-  * Maybe we need to include code to switch between directories here? 
+  
+To begin demultiplexing, we move back up one level:
+
 ```{bash, eval = F}
-# The .txt file consisting of the octamer tags and primers (reffered to as barcodes from here on), 
-# used for the study was previously uploaded to the computer. 
+cd ..
+```
 
-# Take each line of the .txt of the barcodes and adds a line containing info on which sample this barcode belongs to. 
+The *.txt file consisting of the octamer tags and primers (reffered to as barcodes from here on),used for the study was previously uploaded to the computer. 
+
+Take each line of the .txt of the barcodes and adds a line containing info on which sample this barcode belongs to.
+```{bash, eval = F}
 awk '{print">fwd"NR"\n"$0}' ./BARCODES/algae_fwd_barcodes_big.txt > ./BARCODES/algae_barcodes_big.fwd.fasta 
+```
 
-# Take each line of the .txt of the barcodes and adds a line containing info on which sample this barcode belongs to. 
+Take each line of the .txt of the barcodes and adds a line containing info on which sample this barcode belongs to.
+```{bash, eval = F}
 awk '{print">rev"NR"\n"$0}' ./BARCODES/algae_rev_barcodes_big.txt > ./BARCODES/algae_barcodes_big.rev.fasta 
-
 ```
 
 ## Demultiplexing with cutadapt
 
+Create a subdirectory for the file that have the barcodes and primers removed. And enter it.
 ```{bash, eval = F}
-# Create a subdirectory for the file that have the barcodes and primers removed. And enter it.
 mkdir DEMULTIPLEXED
+```
 
-# Activate the cutadapt environment through conda. 
+Activate the cutadapt environment through conda. 
+```{bash, eval = F}
 conda activate cutadaptenv 
+```
+Increase the softlimit of the OS because cutadapt will open a lot of files. 
 
-# Increase the softlimit of the OS because cutadapt will open a lot of files. 
-# One file for each forward and reverse combination. These will be filled with the reads containing the combination.
+One file for each forward and reverse combination. These will be filled with the reads containing the combination.
+```{bash, eval = F}
 ulimit -S -n 3000
+```
 
-
-#Cutadapt Main Commands
-# Everything needs to be run twice because the reads are in mixed orientation,
-# because of the PCR free library preparation. 
-# Because of the dual indexing approach we need to supply two barcode files. 
+## Cutadapt Main Commands
+Everything needs to be run twice, because the reads are in mixed orientation, because of the PCR free library preparation. 
+Because of the dual indexing approach we need to supply two barcode files. 
+```{bash, eval = F}
 cutadapt \
 -j 0 \
 -e 0.15 --no-indels --minimum-length 50 \
@@ -128,15 +143,16 @@ conda deactivate
   * we had two passes through cutadapt so we need to merge the files 
 
 First we rename the different samples. 
+
+Before merging the files we need to rename them to make sorting easier and to only include reads that are real samples, multiplex controls, blanks and PCR negative controls. The text files were uploaded to the RENAMING/ directory before. 
+
+We need to enter the directory where we stored the demultiplexed files.
 ```{bash, eval = F}
-# Before merging the files we need to rename them to make sorting easier and to only include reads that
-# are real samples, multiplex controls, blanks and PCR negative controls. The text files were uploaded to the 
-# RENAMING/ directory before. 
-
-# We need to enter the directory where we stored the demultiplexed files. 
 cd ./DEMULTIPLEXED/
+```
 
-# Then we rename the files. 
+Then we rename the files. 
+```{bash, eval = F}
 paste /YOUR/FILEPATH/HERE/RENAMING/renaming_R1_1_old_big.txt \
 /YOUR/FILEPATH/HERE/RENAMING/renaming_R1_1_new_big.txt \
 | while read n k; do rename -v $n $k * ; done > ./rename_logR1.1.txt
@@ -152,22 +168,22 @@ paste /YOUR/FILEPATH/HERE/RENAMING/renaming_R2_1_old_big.txt \
 paste /YOUR/FILEPATH/HERE/RENAMING/renaming_R2_2_old_big.txt \
  /YOUR/FILEPATH/HERE/RENAMING/renaming_R2_2_new_big.txt \
  | while read n k; do rename -v $n $k * ; done > ./rename_logR2.2.txt
-
 ```
 
 For a later check of how many reads are passing the pipeline we need to create a FASTA file and count the reads. 
 
-```{r}
-# Transform the fastq file to a fasta file. 
+Transform the fastq file to a fasta file. 
+```{bash, eval = F}
 cat A31_B1.round1.1.sample.fastq | \
 awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' > A31_B1.round1.1.sample.fa
 
 cat A31_B1.round2.1.sample.fastq | \
 awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' > A31_B1.round2.1.sample.fa
+```
 
-# Grep the read numbers by counting the lines beginning with >.
+Grep the read numbers by counting the lines beginning with >.
+```{bash, eval = F}
 grep -c '^>' *.fa | less 
-
 ```
 
 > :memo: **Question 4:** What is the difference between FASTQ and FASTA files? 
