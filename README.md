@@ -15,11 +15,8 @@ Below you can see the full list of programs/tools/packages that comprise our ana
 
 ### Command line tools:
  * [BLAST+](https://github.com/ncbi/blast_plus_docs): sequence alignment tool
-
  * [cutadapt](https://cutadapt.readthedocs.io/en/stable/): demultiplexing and primer removal
-
  * [fastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/): generating quality reports
-
  * [multiQC](https://multiqc.info/): aggregating multiple reports into a single report
 
 ### R-based tools:
