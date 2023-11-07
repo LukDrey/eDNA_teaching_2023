@@ -14,6 +14,10 @@ Below you can see the full list of programs/tools/packages that comprise our ana
 ## Program List
 
 ### Command line tools:
+Our command line tools are installed using [conda](https://docs.conda.io/en/latest/), which is a package, dependency, and environment management tool for Unix systems (although it can be used on Windows, too). The two main advantages of conda is 1) it allows you to easily install new programs and tools, and 2) it keeps your tools in separate "environments" to avoid dependency-related problems between different versions of certain packages.
+
+If you want to know more about what this means and how to create and use different environments on conda, [you can go here](https://conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-environments).
+
  * [BLAST+](https://github.com/ncbi/blast_plus_docs): sequence alignment tool
  * [cutadapt](https://cutadapt.readthedocs.io/en/stable/): demultiplexing and primer removal
  * [fastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/): generating quality reports
@@ -35,11 +39,6 @@ Specific tools in R come in "packages" that we need to install and load into our
   * [fantaxtic](https://github.com/gmteunisse/fantaxtic): Nested bar plots for phyloseq data 
   * [here](https://here.r-lib.org/): Package for easy file referencing for reproducible workflows
   * [microbiome](https://microbiome.github.io/tutorials/): Microbiome analytics
-
-
-Another important component of our program list is [conda](https://docs.conda.io/en/latest/), which is a package, dependency, and environment management tool for Unix systems (although it can be used on Windows, too). The two main advantages of conda is 1) to allow you to easily install new programs and tools, and 2) to keep your tools separated into "environments" that can avoid dependency-related problems between different versions of certain packages. This second advantage is something we will see in step 5 of our analysis.
-
-If you want to know more about what this means and how to create and use different environments on conda, [you can go here](https://conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-environments).
 
 # 1. Adapter Trimming 
 
