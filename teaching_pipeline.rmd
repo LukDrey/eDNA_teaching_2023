@@ -16,7 +16,7 @@ Below you can see the full list of programs/tools/packages that comprise our ana
 
 ## Program List
 
-Command line tools:
+### Command line tools:
  * [BLAST+](https://github.com/ncbi/blast_plus_docs): sequence alignment tool
 
  * [cutadapt](https://cutadapt.readthedocs.io/en/stable/): demultiplexing and primer removal
@@ -25,19 +25,22 @@ Command line tools:
 
  * [multiQC](https://multiqc.info/): aggregating multiple reports into a single report
 
-R/RStudio tools:
- * [R(<https://www.r-project.org/>) (and [RStudio](https://posit.co/products/open-source/rstudio/)): statistical software environment
- ### Specific functions in R come in "packages" that we need to install and load into our working environment. 
-    + [dada2](https://benjjneb.github.io/dada2/): Accurate, high-resolution sample inference from amplicon sequencing data (denoising, filtering, clustering of amplicon sequence variants [ASVs] and assigning taxonomy)
-    + [ShortRead](https://kasperdanielhansen.github.io/genbioconductor/html/ShortRead.html): FASTQ input and manipulation (reading and examining raw sequence reads)
-    + [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html): Efficient manipulation of biological strings (reading and examining sequence data)
-    + [phyloseq](https://joey711.github.io/phyloseq/): Explore microbiome profiles using R (useful for getting our data into a format that works with many other packages)
-    + [tidyverse](https://www.tidyverse.org/): Several key R packages for data science and data manipulation
-    + [MicEco](https://github.com/Russel88/MicEco): Various functions for analysis for microbial community data
-    + [vegan](https://cran.r-project.org/web/packages/vegan/index.html): Ordination methods, diversity analysis and other functions for community and vegetation ecologists
-    + [fantaxtic](https://github.com/gmteunisse/fantaxtic): Nested bar plots for phyloseq data 
-    + [here](https://here.r-lib.org/): Package for easy file referencing for reproducible workflows
-    + [microbiome](https://microbiome.github.io/tutorials/): Microbiome analytics
+### R-based tools:
+
+Most of our analyses will be done in [R](https://www.r-project.org/) using the [RStudio](https://posit.co/products/open-source/rstudio/) graphical environment.
+
+Specific tools in R come in "packages" that we need to install and load into our working environment. 
+
+  * [dada2](https://benjjneb.github.io/dada2/): Accurate, high-resolution sample inference from amplicon sequencing data (denoising, filtering, clustering of amplicon sequence variants [ASVs] and assigning taxonomy)
+  * [ShortRead](https://kasperdanielhansen.github.io/genbioconductor/html/ShortRead.html): FASTQ input and manipulation (reading and examining raw sequence reads)
+  * [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html): Efficient manipulation of biological strings (reading and examining sequence data)
+  * [phyloseq](https://joey711.github.io/phyloseq/): Explore microbiome profiles using R (useful for getting our data into a format that works with many other packages)
+  * [tidyverse](https://www.tidyverse.org/): Several key R packages for data science and data manipulation
+  * [MicEco](https://github.com/Russel88/MicEco): Various functions for analysis for microbial community data
+  * [vegan](https://cran.r-project.org/web/packages/vegan/index.html): Ordination methods, diversity analysis and other functions for community and vegetation ecologists
+  * [fantaxtic](https://github.com/gmteunisse/fantaxtic): Nested bar plots for phyloseq data 
+  * [here](https://here.r-lib.org/): Package for easy file referencing for reproducible workflows
+  * [microbiome](https://microbiome.github.io/tutorials/): Microbiome analytics
 
 
 Another important component of our program list is [conda](https://docs.conda.io/en/latest/), which is a package, dependency, and environment management tool for Unix systems (although it can be used on Windows, too). The two main advantages of conda is 1) to allow you to easily install new programs and tools, and 2) to keep your tools separated into "environments" that can avoid dependency-related problems between different versions of certain packages. This second advantage is something we will see in step 5 of our analysis.
