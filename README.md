@@ -188,66 +188,76 @@ grep -c '^>' *.fa | less
 
 > :memo: **Question 4:** What is the difference between FASTQ and FASTA files? 
   
-Now merge the two files. 
+Now we merge the two files. 
 
+First we prepare a new subdirectory for the merged files. 
 ```{bash, eval = F}
-# Create a subdirectory for the merged files. 
 mkdir MERGED
+```
 
-# First create two lists of the filenames for the pairs from the cutadapt results. 
+Then we create two lists of filenames for the pairs from the cutadapt results. 
+```{bash, eval = F}
 ls -1 *round1.1.sample.fastq | sed 's/round1.1.sample.fastq//' > listround1.1.
 
 ls -1 *round2.1.sample.fastq | sed 's/round2.1.sample.fastq//' > listround2.1.
+```
 
-# Now we can merge the pairs. First for the files from R1.   
+Now we can merge the pairs, starting first with the files from R1.  
+```{bash, eval = F}
 paste listround1.1. listround2.1. | while read n k; \
 do cat $n"round1.1.sample.fastq" $k"round2.1.sample.fastq" > ./MERGED/$n"sample_demux.1.fastq"; done
+```
 
-# And again for the R2 reads. 
+And then for the R2 reads. 
+```{bash, eval = F}
 ls -1 *round1.2.sample.fastq | sed 's/round1.2.sample.fastq//'  > listround1.2.
 
 ls -1 *round2.2.sample.fastq | sed 's/round2.2.sample.fastq//' > listround2.2.
 
 paste listround1.2. listround2.2. | while read n k; \
 do cat $n"round1.2.sample.fastq" $k"round2.2.sample.fastq" > ./MERGED/$n"sample_demux.2.fastq"; done
+```
 
-# To check if the merging has worked, we create a FASTA file of the merged sample 
-# and check if the read numbers match the paired files. 
+In order to check if the merging has worked, we create a FASTA file of the merged sample and check if the read numbers match the paired files. 
 
-# Transform the fastq file to a fasta file. 
+Transform the fastq file to a fasta file. 
+```{bash, eval = F}
 cat ./MERGED/A31_B1.sample_demux.1.fastq | \
  awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' > A31_B1.sample_demux.1.fa
+```
 
-# Grep the read numbers by counting the lines beginning with >.
+Grep the read numbers by counting the lines beginning with >.
+```{bash, eval = F}
 grep -c '^>' *sample*.fa | less 
+```
 
-# Exit the DEMULTIPLEXED subdirectory. 
+Exit the DEMULTIPLEXED subdirectory. 
+```{bash, eval = F}
 cd ..
-
 ```
 
 # 4. Checking for leftover primer sequences.
 
-  * To run DADA2 we need to activate R 
+To run DADA2 we need to first activate R. 
 
-Open R Studio
+We will activate and use R inside the RStudio environment, which is a GUI wrapper for writing and running R code (and other types of code as well).
 
+Once we've opened RStudio, we first load all required packages. 
 ```{r, eval = F}
-# Then we load all required packages. 
-
 library(dada2) ; packageVersion('dada2')
-
 library(ShortRead) ; packageVersion('ShortRead')
-
 library(Biostrings) ; packageVersion('Biostrings')
+```
 
-# Create objects that contain the primer sequences.  
-# For the algae that is:
-
+Create objects that contain the primer sequences.  
+For the algae that is:
+```{r, eval = F}
 FWD <- 'GTGARTCATCGAATCTTTG'
 REV <- 'TCCTCCGCTTATTGATATGC'
+```
 
-# Make a custom function that creates all the possible orientations of the primers e.g. complement, reverse complement.
+Make a custom function that creates all the possible orientations of the primers e.g. complement, reverse complement.
+```{r, eval = F}
 allOrients <- function(primer) {
   require(Biostrings)
   # Create all orientations of the input sequence
@@ -256,65 +266,80 @@ allOrients <- function(primer) {
                RevComp=reverseComplement(dna))
   return(sapply(orients, toString))  # back to character vector
 }
+```
 
-# Make and save the orientation files.
+Make and save the orientation files.
+```{r, eval = F}
 FWD.orients <- allOrients(FWD)
 FWD.orients
 
 REV.orients <- allOrients(REV)
 REV.orients
+```
 
-# Load in the demultiplexed files. 
-
+Load in the demultiplexed files. 
+```{r, eval = F}
 fnFs <- sort(list.files(path = './DEMULTIPLEXED/MERGED', pattern = "sample_demux.1.fastq", full.names = TRUE))
 fnRs <- sort(list.files(path = './DEMULTIPLEXED/MERGED', pattern = "sample_demux.2.fastq", full.names = TRUE))
+```
 
-# Filter out ambiguous Ns with the filterAndTrim function setting maxN to zero.
-# Place the N-filterd files into a filtN/ subdirectory.
+Filter out ambiguous Ns with the filterAndTrim function setting maxN to zero.
+Place the N-filterd files into a filtN/ subdirectory.
+```{r, eval = F}
 fnFs.filtN <- file.path(path = './DEMULTIPLEXED/MERGED', "filtN", basename(fnFs)) 
 fnRs.filtN <- file.path(path = './DEMULTIPLEXED/MERGED', "filtN", basename(fnRs))
 filterAndTrim(fnFs, fnFs.filtN, fnRs, fnRs.filtN, maxN = 0, multithread = TRUE)
+```
 
-# Check for any leftover primers after the removal with Cutadapt.
+Check for any leftover primers after the removal with Cutadapt.
 
-# Create a function that counts the number of reads in which the primer is found.
+Create a function that counts the number of reads in which the primer is found.
+```{r, eval = F}
 primerHits <- function(primer, fn) {
     # Counts number of reads in which the primer is found
     nhits <- vcountPattern(primer, sread(readFastq(fn)), fixed = FALSE)
     return(sum(nhits > 0))
 }
+```
 
-# Search through all the reads and combine in a dataframe.
-# If the samples come from the same library prep then it is enough to only process one of the files 
-# (see the [1] at the end of the command). 
+Search through all the reads and combine in a dataframe.
+If the samples come from the same library prep then it is enough to only process one of the files 
+(see the [1] at the end of the command). 
+```{r, eval = F}
 rbind(FWD.ForwardReads = sapply(FWD.orients, primerHits, fn = fnFs.filtN[[1]]), 
     FWD.ReverseReads = sapply(FWD.orients, primerHits, fn = fnRs.filtN[[1]]), 
     REV.ForwardReads = sapply(REV.orients, primerHits, fn = fnFs.filtN[[1]]), 
     REV.ReverseReads = sapply(REV.orients, primerHits, fn = fnRs.filtN[[1]]))
-
 ```
   
 > :memo: **Question 5:** How many reads still contain primer sequences? 
 
-Move out of R and into the terminal again. 
-Go through a second pass of cutadapt to remove the remaining primers. 
+Next we move out of R and back to the terminal. 
+We now go through a second pass of cutadapt in order to remove the remaining primers. 
 
+
+Open the cutadapt environment.
+Remove leftover primers with Cutadapt
 ```{bash, eval = F}
-# Open the cutadapt environment.
-# Remove leftover primers with Cutadapt
 conda activate cutadaptenv
+```
 
-# Create a subdirectory for the first primer removal.
+Create a subdirectory for the first primer removal.
+```{bash, eval = F}
 mkdir PRIMER_REMOVED1 
+```
 
-# Enter the MERGED subdirectory.
+Enter the MERGED subdirectory.
+```{bash, eval = F}
 cd DEMULTIPLEXED/MERGED/
+```
 
-# The command below contains all possible orientations: 
-# 1) fwd-rcrev + rev-rcfwd; 2) rcfwd-rev + rcrev-fwd; \
-# 3) fwd + rcfwd; 4) rcfwd + fwd; 5) rev + rcrev; 6) rcrev + rev
+The command below contains all possible orientations: 
+  1) fwd-rcrev + rev-rcfwd; 2) rcfwd-rev + rcrev-fwd; \
+  3) fwd + rcfwd; 4) rcfwd + fwd; 5) rev + rcrev; 6) rcrev + rev
 
-# Use a for loop to run Cutadapt over all samples. 
+Use a for loop to run Cutadapt over all samples. 
+```{bash, eval = F}
 ls *demu*.fastq | cut -f1 -d'.' > samples
 
 for sample in $(cat samples); do
@@ -334,13 +359,16 @@ cutadapt --cores=0 --minimum-length 50 \
  > cutadapt_primer_trimming_stats_{sample}.txt
 
 done 
+```
 
-# Close cutadapt environment.
+Close cutadapt environment.
+```{bash, eval = F}
 conda deactivate 
+```
 
-# Exit the subdirectory and go to our base directory for the fungal reads.
+Exit the subdirectory and go to our base directory for the fungal reads.
+```{bash, eval = F}
 cd ../..
-
 ```
 > :memo: **Question 6:** How does the cutadapt call for the demultiplexing step differ from the primer removal? 
   
