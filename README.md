@@ -146,7 +146,7 @@ conda deactivate
 
 > :memo: **Question 3:** Which differences do you notice between the two cutadapt commands? And why do we need to use two different commands? 
   
-  Because of the mixed-orientation of the reads we needed to go trough cutadapt twice. However, the two files of course contain pairs of files belonging to the same biological sample. This is why we need to merge them. 
+Because of the mixed-orientation of the reads we needed to go trough cutadapt twice. However, the two files of course contain pairs of files belonging to the same biological sample. This is why we need to merge them. 
 
 First we rename the different samples to meaningful names we can attribute to the three regions of the Biodiversity Exploratories and the 50 plots within each of the regions. Additionally it makes sorting easier and we only include reads that are real samples, multiplex controls, blanks and PCR negative controls. The text files necessary to do this indicate which combination of forward and reverse barcodes belong to which sample, and were uploaded to the RENAMING/ directory before. 
 
@@ -155,7 +155,7 @@ We need to enter the directory where we stored the demultiplexed files.
 cd ./DEMULTIPLEXED
 ```
 
-Then we rename the files. 
+Then we rename the files, by taking two text files that contain the old and the new files. Than we loop through the files and change the name of the files by taking the rows content to be the new name. 
 ```{bash, eval = F}
 paste ../RENAMING/renaming_R1_1_old_big.txt \
 ../RENAMING/renaming_R1_1_new_big.txt \
@@ -185,17 +185,17 @@ cat A31_B1.round2.1.sample.fastq | \
 awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' > A31_B1.round2.1.sample.fa
 ```
 
-Grep the read numbers by counting the lines beginning with >.
+Use grep to get the read numbers by counting the lines beginning with >.
 ```{bash, eval = F}
 grep -c '^>' *.fa | less 
 ```
 
-> :memo: **Question 4a:** What is the difference between FASTQ and FASTA files? 
-> :memo: **Question 4b:** How many reads are in sample A31_B1? And how many reads are in Sample H12_B3?
+> :memo: **Question 4:** What is the difference between FASTQ and FASTA files? 
+> :memo: **Question 5:** How many reads are in sample A31_B1? And how many reads are in Sample H12_B3?
   
 Now merge the two files from the two passes through cutadapt. 
 
-First we create a new subdirectory for the merged files. 
+First we create a new sub-directory for the merged files. 
 ```{bash, eval = F}
 mkdir MERGED
 ```
@@ -207,13 +207,13 @@ ls -1 *round1.1.sample.fastq | sed 's/round1.1.sample.fastq//' > listround1.1.
 ls -1 *round2.1.sample.fastq | sed 's/round2.1.sample.fastq//' > listround2.1.
 ```
 
-Now we can merge the pairs, starting first with the files from R1.  
+Now we can merge the pairs by just pasting them together. We start with the files from R1.  
 ```{bash, eval = F}
 paste listround1.1. listround2.1. | while read n k; \
 do cat $n"round1.1.sample.fastq" $k"round2.1.sample.fastq" > ./MERGED/$n"sample_demux.1.fastq"; done
 ```
 
-And then for the R2 reads. 
+And then we do the same for the R2 reads. 
 ```{bash, eval = F}
 ls -1 *round1.2.sample.fastq | sed 's/round1.2.sample.fastq//'  > listround1.2.
 
@@ -223,7 +223,7 @@ paste listround1.2. listround2.2. | while read n k; \
 do cat $n"round1.2.sample.fastq" $k"round2.2.sample.fastq" > ./MERGED/$n"sample_demux.2.fastq"; done
 ```
 
-In order to check if the merging has worked, we create a FASTA file of the merged sample and check if the read numbers match the paired files. 
+In order to check if the merging has worked, we create a FASTA file of the merged sample and check if the read numbers match the paired files we checked before. 
 
 Transform the fastq file to a fasta file. 
 ```{bash, eval = F}
@@ -231,12 +231,12 @@ cat ./MERGED/A31_B1.sample_demux.1.fastq | \
  awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' > A31_B1.sample_demux.1.fa
 ```
 
-Grep the read numbers by counting the lines beginning with >.
+Use grep to get the read numbers by counting the lines beginning with >.
 ```{bash, eval = F}
 grep -c '^>' *sample*.fa | less 
 ```
 
-Exit the DEMULTIPLEXED subdirectory. 
+Exit the DEMULTIPLEXED sub-directory. 
 ```{bash, eval = F}
 cd ..
 ```
@@ -254,7 +254,7 @@ library(ShortRead) ; packageVersion('ShortRead')
 library(Biostrings) ; packageVersion('Biostrings')
 ```
 
-Create objects that contain the primer sequences.  
+We create objects that contain the primer sequences.  
 For the fungi that is:
 ```{r, eval = F}
 FWD <- 'GTGARTCATCGAATCTTTG'
@@ -273,7 +273,7 @@ allOrients <- function(primer) {
 }
 ```
 
-Make the orientation files.
+Make objects that contain the orientations.
 ```{r, eval = F}
 FWD.orients <- allOrients(FWD)
 FWD.orients
@@ -282,13 +282,13 @@ REV.orients <- allOrients(REV)
 REV.orients
 ```
 
-Load in the demultiplexed files. 
+Set the file paths to the demultiplexed files. 
 ```{r, eval = F}
 fnFs <- sort(list.files(path = './Data/DEMULTIPLEXED/MERGED', pattern = "sample_demux.1.fastq", full.names = TRUE))
 fnRs <- sort(list.files(path = './Data/DEMULTIPLEXED/MERGED', pattern = "sample_demux.2.fastq", full.names = TRUE))
 ```
 
-Filter out ambiguous Ns with the filterAndTrim function setting maxN to zero.
+Dada2 cannot deal with ambiguous bases which are for example contauined in our primers. So we filter out ambiguous Ns with the filterAndTrim function setting maxN to zero.
 Place the N-filterd files into a filtN/ subdirectory.
 ```{r, eval = F}
 fnFs.filtN <- file.path(path = './Data/DEMULTIPLEXED/MERGED', "filtN", basename(fnFs)) 
@@ -296,7 +296,7 @@ fnRs.filtN <- file.path(path = './Data/DEMULTIPLEXED/MERGED', "filtN", basename(
 filterAndTrim(fnFs, fnFs.filtN, fnRs, fnRs.filtN, maxN = 0, multithread = TRUE)
 ```
 
-Check for any leftover primers after the removal with Cutadapt.
+Check for any leftover primers after the demultiplexing with Cutadapt.
 
 Create a function that counts the number of reads in which the primer is found.
 ```{r, eval = F}
@@ -307,7 +307,7 @@ primerHits <- function(primer, fn) {
 }
 ```
 
-Search through all the reads and combine in a dataframe.
+Search through all the reads and combine in a table.
 If the samples come from the same library prep then it is enough to only process one of the files 
 (see the [1] at the end of the command). 
 ```{r, eval = F}
@@ -317,11 +317,10 @@ rbind(FWD.ForwardReads = sapply(FWD.orients, primerHits, fn = fnFs.filtN[[1]]),
     REV.ReverseReads = sapply(REV.orients, primerHits, fn = fnRs.filtN[[1]]))
 ```
   
-> :memo: **Question 5:** How many reads still contain primer sequences? 
+> :memo: **Question 6:** How many reads still contain primer sequences? 
 
 Next we move out of R and back to the terminal. 
 We now go through a second pass of cutadapt in order to remove the remaining primers. 
-
 
 Open the cutadapt environment.
 Remove leftover primers with Cutadapt.
@@ -375,7 +374,7 @@ Exit the subdirectory and go to our base directory for the fungal reads.
 ```{bash, eval = F}
 cd ../..
 ```
-> :memo: **Question 6:** How does the cutadapt call for the demultiplexing step differ from the primer removal? What does the flag --cores=0 indicate (hint: Look at the cutadapt website/manual)?
+> :memo: **Question 7:** How does the cutadapt call for the demultiplexing step differ from the primer removal? What does the flag --cores=0 indicate (hint: Look at the cutadapt website/manual)?
   
 Now we check for primers again.  For that we switch to RStudio again.
 
@@ -403,7 +402,7 @@ rbind(FWD.ForwardReads = sapply(FWD.orients, primerHits, fn = fnFs.filtN[[1]]),
 
 ```
 
-> :memo: **Question 7:** Was the primer removal successful? Or do we need to go through cutadapt again? 
+> :memo: **Question 8:** Was the primer removal successful? Or do we need to go through cutadapt again? 
 
 # 5. Sample inference with DADA2
 
@@ -459,6 +458,7 @@ head(out_2)
 head(out_3)
 
 ```
+> :memo: **Question 9:** What is the function of the truncLen and maxEE parameters in the filterAndTrim function? (Hint: Look at the help file for the function)
 
 Learn the error profiles from the reads. 
 
@@ -479,10 +479,22 @@ errR_3 <- learnErrors(filtRs_3, multithread = TRUE)
 
 ```
 
-> :memo: **Question 8:** Why do we need to do everything three times? 
+> :memo: **Question 10:** Why do we need to do everything three times? 
 
-Run the DADA2 core for sample inference (i.e. call the ASVs). 
-  
+To have our samples correctly named in the final ASV table we need to rename the filtered files. 
+```{r, eval = F}
+# Name the filtered objects. 
+names(filtFs_1) <- sample.names
+names(filtRs_1) <- sample.names
+
+names(filtFs_2) <- sample.names
+names(filtRs_2) <- sample.names
+
+names(filtFs_3) <- sample.names
+names(filtRs_3) <- sample.names
+```
+
+Now we run the DADA2 core for sample inference (i.e. call the ASVs) from sequences within samples. 
 ```{r, eval = F}
 dadaFs_1 <- dada(filtFs_1, err = errF_1, multithread = TRUE)
 dadaRs_1 <- dada(filtRs_1, err = errR_1, multithread = TRUE)
@@ -492,15 +504,19 @@ dadaRs_2 <- dada(filtRs_2, err = errR_2, multithread = TRUE)
 
 dadaFs_3 <- dada(filtFs_3, err = errF_3, multithread = TRUE)
 dadaRs_3 <- dada(filtRs_3, err = errR_3, multithread = TRUE)
+```
 
-# Merge the forwards and reverse reads within the technical replications.
+Afterwards we need to merge the forward and reverse reads within the technical replicates. The function does this by aligning the reads with each other. Essentially this takes our shorter reads and combines them into a longer sequence that covers the ITS2 region.
+```{r, eval = F}
 mergers_1 <- mergePairs(dadaFs_1, filtFs_1, dadaRs_1, filtRs_1, verbose=TRUE)
 
 mergers_2 <- mergePairs(dadaFs_2, filtFs_2, dadaRs_2, filtRs_2, verbose=TRUE)
 
 mergers_3 <- mergePairs(dadaFs_3, filtFs_3, dadaRs_3, filtRs_3, verbose=TRUE)
+```
 
-# Construct the ASV table per replicate. 
+We then finally construct the ASV table for each replicate. An ASV table is a sample x ASV table with counts of how often the ASV occurs in each sample (replicate in this case). 
+```{r, eval = F}
 seqtab_1 <- makeSequenceTable(mergers_1)
 dim(seqtab_1)
 
@@ -511,9 +527,9 @@ seqtab_3 <- makeSequenceTable(mergers_3)
 dim(seqtab_3)
 
 ```
-> :memo: **Question xxx:** How many ASVs do we find in each of the replicates?
+> :memo: **Question 11:** How many ASVs do we find in each of the replicates?
 
-Remove chimeric sequences created during PCR. 
+As a last step that is being done to the individual replicates we remove chimeric sequences that sometimes occur during PCR. 
 
 ```{r, eval = F}
 # Chimera removal for the replicates. 
@@ -525,9 +541,9 @@ seqtab_3.nochim <- removeBimeraDenovo(seqtab_3, method="consensus", multithread=
 
 ```
 
-> :memo: **Question 9:** What are chimeric sequences? 
+> :memo: **Question 12:** What are chimeric sequences? 
 
-Merge the resulting tables so we have one ASV table for all fungi from the three technical replicates. 
+Now we can merge the resulting tables so we have one ASV table for all fungi from the three technical replicates. 
 
 ```{r, eval = F}
 # Merge the two ASV tables.
@@ -536,10 +552,14 @@ input_tables <- list(seqtab_1.nochim, seqtab_2.nochim, seqtab_3.nochim)
 
 seqtab_merge <- mergeSequenceTables(tables = input_tables, repeats = 'sum', tryRC = TRUE)
 
-# An additional run to remove chimeric sequences. 
+# Just for good practice we do an additional run to remove chimeric sequences. 
 seqtab_merge.nochim <- removeBimeraDenovo(seqtab_merge, method="consensus", multithread=TRUE, verbose=TRUE)
+```
 
-# Inspect the sequence lengths to look for anything that seems suspicious. Not the case here.
+> :memo: **Question 13:** How many ASVs do we have in the merged ASV table?
+
+We want to inspect the sequence lengths to look for anything that seems suspicious. That could be a lot of very short sequences for example, but this is not the case here.
+```{r, eval = F}
 table(nchar(getSequences(seqtab_merge.nochim)))
 
 # Give the sequence variants more manageable names, e.g. ASVn  
@@ -552,11 +572,9 @@ for (i in 1:dim(seqtab_merge.nochim)[2]) {
 
 ```
 
-> :memo: **Question 10:** What is the range of the sequence length of our amplicons? 
-> :memo: **Question xxx:** How many ASVs do we find in the merged ASV table?
+> :memo: **Question 14:** What is the range of the sequence length of our amplicons? 
   
 Track our reads through the pipeline so we can see how many reads are filtered out. 
-
 ```{r, eval = F}
 # Track the reads through the pipeline.
 # This is a last sanity check to see if we are not loosing samples at an unexpected step. 
@@ -583,7 +601,7 @@ head(track_3)
 
 ```
 
-> :memo: **Question 11:** How many sequences did we loose at each step for the first six ASVs occuring in the table? 
+> :memo: **Question 15:** How many sequences did we loose at each step for the first six ASVs occuring in the table? 
   
 Now we go on to save our data so we could load it in later. 
 
@@ -604,7 +622,7 @@ saveRDS(seqtab_merge.nochim, 'asv_table_fungi.rds')
 
 DADA2 also has built in functionality to assign taxonomy to our ASVs. To do so we need a database that contains sequence information and the corresponding information on taxonomy like the different taxonomic ranks. One of these, and the most commonly used for fungi, is the [UNITE](https://unite.ut.ee/index.php) database. Unfortunately we cannot run these commands on the local computers, because the process is to memory-intensive. We have run the command for you and you can find it in the folder Databases.
 
-Here is how you would do the taxonomy assignment. *PLEASE DO NOT RUN THIS*
+Here is how you would do the taxonomy assignment. :no_entry:*PLEASE DO NOT RUN THIS*:no_entry:
 ```{r, eval = F}
 # Read in the UNITE database fasta.  
 # unite.ref <- './sh_general_release_dynamic_all_25.07.2023.fasta'  
@@ -617,33 +635,9 @@ Here is how you would do the taxonomy assignment. *PLEASE DO NOT RUN THIS*
 
 ```
 
-# 7. Match List 
+# 7. ASV curation and removal of potential contaminants
 
-We will later run a so-called post clustering algorithm and need to find similar sequences in our FASTA file to do so. We will use a tool called BLAST and make a database from our FASTA file, and then search in the same file for sequences that are more than 84% similar to each other. 
-
-```{bash, eval = F}
-# Open the conda environment containing blast. 
-conda activate blastenv
-
-# Create a database containing the algal ASVs in fasta format.
-makeblastdb -in ASVs_fungi.fa -parse_seqids -dbtype nucl
-
-# Compare all ASVs to each other and create a match list of sequences that are similar to each other.
-blastn -db ASVs_fungi.fa \
--outfmt '6 qseqid sseqid pident' \
--out match_list_fungi.txt \
--qcov_hsp_perc 80 \
--perc_identity 84 \
--num_threads 20 \
--query ASVs_fungi.fa
-
-conda deactivate
-
-```
-
-# 8. ASV curation and removal of potential contaminants
-
-First we need to load additional packages. 
+Before we can start with the curation and decontamination we need to load additional packages. 
 
 ```{r, eval = F}
 library(here)
@@ -662,43 +656,48 @@ library(tidyverse)
 
 ## Decontamination
 
+To look for potential contaminants in our dataset we use a tool called decontam. The algorithm looks for sequences contained in our PCR negative controls and decides if these are contaminants based on the frequency (how often does the sequence occur) and prevalence (in how many samples does it occur).  
+
 Load in the data.
 
 ```{r, eval = F}
-# Load ASV table for fungi (available as supplementary data).
-fungi_asv <- utils::read.csv(here("Data", 'asv_table_fungi.txt'), header = T, sep = '\t')
+# Load in the ASV table for the fungi.
+fungi_asv <- readRDS(here("Data", "asv_table_fungi.rds")) %>% 
+as.data.frame() %>% 
+tibble::rownames_to_column(var = "sequence_fungi")
 
-# Load FASTA file to get ASV_IDs.
+# Load in the FASTA file so we can get the ASV_IDs.
 fungi_seqs_fasta <- Biostrings::readDNAStringSet(here::here("Data", 'ASVs_fungi.fa'))
 
-# Make a dataframe of the sequences and their ASV ID. 
+# Then we combine the sequences and their corresponding ASV IDs in a dataframe. 
 seq_name_fungi <- base::names(fungi_seqs_fasta)
 sequence_fungi <- base::paste(fungi_seqs_fasta)
 fungi_rep_seqs <- base::data.frame(seq_name_fungi, sequence_fungi)
 
-# Join the ASV table and the representative sequences.
+# Join the ASV table with the representative sequences from the FASTA file.
 fungi_asv_IDs <- dplyr::left_join(fungi_rep_seqs, fungi_asv, by = 'sequence_fungi')
 
 # Naming the Samples. 
 fungi_asv_IDs <- fungi_asv_IDs %>% 
   dplyr::rename_with(~base::paste0("Sample_", .), -c(1:2))
 
-# set ASV ID as the rownames.
+# Set the ASV ID as the rownames.
 base::rownames(fungi_asv_IDs) <- fungi_asv_IDs$seq_name_fungi
 fungi_asv_IDs$seq_name_fungi <- NULL
+fungi_asv_IDs$sequence_fungi <- NULL
 
-# Load the DNA concentration necessary for decontam (available as supplementary data). 
+# Load the DNA concentration which we will need to run the decontamination with decontam. 
 fungi_conc <- utils::read.csv(here("Data", 'fungi_decontam_conc_big.csv'), header = T, sep =',')
 base::rownames(fungi_conc) <- base::paste0("Sample_", fungi_conc$sample_ID)
 base::rownames(fungi_conc) <- base::sub("[-]", "_", x = base::rownames(fungi_conc))
 
 ```
 
-Combine them into a so-called phyloseq object. 
+Many tools for the analysis of microbiome sequencing data are compatible with so-called phyloseq objects. Phlyoseq is a package that manages and combines data such as the ASV table, taxonomy table and metadata. Decontam is one of the packages that accept phyloseq objects. So we combine the data in such an object.
 
 ```{r, eval = F}
 # Make the parts of the phyloseq object.
-ASV_mat_decontam_fun <- base::data.matrix(fungi_asv_IDs)
+ASV_mat_decontam_fun <- base::data.matrix(fungi_asv_IDs[complete.cases(fungi_asv_IDs),])
 ASV_fungi_decontam <- phyloseq::otu_table(ASV_mat_decontam_fun, taxa_are_rows = TRUE)
 sampledata_fungi_decontam <- phyloseq::sample_data(fungi_conc)
 
@@ -707,20 +706,22 @@ ps_fungi_decontam <- phyloseq::phyloseq(ASV_fungi_decontam, sampledata_fungi_dec
 ps_fungi_decontam
 ```
 
-> :memo: **Question 12:** How many ASVs does our dataset contain before filtering out contaminants?
-  
-Run the decontamination algorithm. 
+> :memo: **Question 16:** How many ASVs does our dataset contain before filtering out contaminants?
+
+In a first step we can check the library sizes of the samples and our controls visually. Library sizes indicate how many reads our samples contain. 
 
 ```{r, eval = F}
-# Check the library sizes of the Samples and Controls.
 df_fungi <- base::as.data.frame(phyloseq::sample_data(ps_fungi_decontam)) # Put sample_data into a ggplot-friendly data.frame
 df_fungi$LibrarySize <- phyloseq::sample_sums(ps_fungi_decontam)
 df_fungi <- df_fungi[base::order(df_fungi$LibrarySize),]
 df_fungi$Index <- base::seq(base::nrow(df_fungi))
 ggplot2::ggplot(data=df_fungi, ggplot2::aes(x=Index, y=LibrarySize, color=Sample_or_Control)) +
   ggplot2::geom_point()
+```
 
-# Decontam with combined frequency and prevalence approach. 
+Now we can run the decontamination algorithm. We are using the combined approach of frequency and prevalence.
+
+```{r, eval = F}
 phyloseq::sample_data(ps_fungi_decontam)$is.neg <- phyloseq::sample_data(ps_fungi_decontam)$Sample_or_Control == "Control Sample"
 contam_fungi_combi <- decontam::isContaminant(ps_fungi_decontam,
                                     method = 'combined',
@@ -729,7 +730,7 @@ contam_fungi_combi <- decontam::isContaminant(ps_fungi_decontam,
 base::table(contam_fungi_combi$contaminant)
 base::which(contam_fungi_combi$contaminant)
 
-# Trim the identified contaminants from the phyloseq object 
+# Remove the identified contaminants from the phyloseq object 
 ps_fungi_noncontam <- phyloseq::prune_taxa(!contam_fungi_combi$contaminant,
                                  ps_fungi_decontam)
 ps_fungi_noncontam
@@ -739,13 +740,44 @@ ps_fungi_noncontam_pruned <- phyloseq::prune_taxa(phyloseq::taxa_sums(ps_fungi_n
                                         ps_fungi_noncontam)
 ```
 
-> :memo: **Question 13:** Which taxa were removed from the original datasets as contaminants? 
-> :memo: **Question 14:** How many taxa remain after this step?
-> :memo: **Question 15:** What is the difference between the frequency, prevalence and combined approach in the decontam function?
+> :memo: **Question 17:** Which taxa were removed from the original datasets as contaminants? 
+> :memo: **Question 18:** How many taxa remain after this step?
+> :memo: **Question 19:** What is the difference between the frequency, prevalence and combined approach in the decontam function?
   
 ## LULU curation
 
-* LULU is an algorithm to cluster similar reads to obtain more accurate diversity estimates
+### Match List 
+
+We will run a curation with LULU, a so-called post clustering algorithm. It basically takes similar sequences and decides if they are similar enough to be the same biological entity. It works on their co-occurence pattern in our dataset. 
+
+We don't want it to compare each sequence with eachother. So we need to make a table of which sequences are similar to eacxh other above a certain similarity threshold. This table is called a matchlist.
+
+We move to the terminal.
+
+```{bash, eval = F}
+# Open the conda environment containing blast. 
+conda activate blast
+
+# Move into the Data folder.
+cd Data
+
+# Create a database containing the algal ASVs in fasta format.
+makeblastdb -in ASVs_fungi.fa -parse_seqids -dbtype nucl
+
+# Compare all ASVs to each other and create a match list of sequences that are similar to each other.
+blastn -db ASVs_fungi.fa \
+-outfmt '6 qseqid sseqid pident' \
+-out match_list_fungi.txt \
+-qcov_hsp_perc 80 \
+-perc_identity 84 \
+-num_threads 6 \
+-query ASVs_fungi.fa
+
+conda deactivate
+
+```
+
+Now that we have obtained our matchlist we move back into RStudio and run the actual LULU curation.
 
 ```{r, eval = F}
 ASV_table_fungi <- base::as.data.frame(phyloseq::otu_table(ps_fungi_noncontam_pruned))
@@ -761,17 +793,25 @@ ASV_table_fungi_cur <- lulu::lulu(ASV_table_fungi, fungi_matchlist)
 ASV_table_fungi_cur$curated_count
 ASV_table_fungi_cur$discarded_count
 
+# Save the table. 
+saveRDS(ASV_table_fungi_cur, here("Data", "ASV_table_fungi_cur.rds"))
+
+
 ```
 
-> :memo: **Question 16:** How many reads were merged? 
-> :memo: **Question 17:** Which parameters does the LULU algorithm consider in it's merging? 
-> :memo: **Question 18:** What are the default parameters? 
+> :memo: **Question 20:** How many reads were merged? 
+> :memo: **Question 21:** Which parameters does the LULU algorithm consider in it's merging? 
+> :memo: **Question 22:** What are the default parameters? 
   
 # Diversity Analysis
 
-# 9. Data initialization 
+Now we have most of the technical processing of the sequencing results done and can finally move on to answering question. In this course we will care mostly about community composition and how it differs between some environmental groups. We will work with the data from one of the Biodiversity Exploratories: The Biosphere Reserve Schorfheide-Chorin. 
 
-Load in the taxonomy table. 
+## 8. Data initialization 
+
+Before we can actually get into the questions we need to do a few last steps that have to do with cleaning our data so it is nice and presentable. It also makes it easier to work with. 
+
+First we load in the taxonomy table we have created with DADA2. 
 
 ```{r, eval = F}
 # Load in taxonomy table. 
@@ -793,9 +833,12 @@ tax_clean_fungi <- dplyr::left_join(tax_fungi, fungi_rep_seqs, by = 'sequence_fu
 
 ```
 
-Clean the taxonomy table so it looks nicer and is easier to handle. 
+To make the taxonomy table nicer to look at and easier to work with we need to do some cleaning. The syntax of the UNITE database we used includes the information on taxonomy in a different format than we would like. We want to remove the underscores and have one column per taxonomic level. 
 
 ```{r, eval = F}
+# Have a look at the original table.
+View(tax_clean_fungi)
+
 # Split the taxonomy into different columns of taxonomic levels.
 fungi_tax_fin <- tidyr::separate(tax_clean_fungi, Kingdom, c(NA, 'Kingdom') , sep = '__') %>% 
   tidyr::separate(Phylum, c(NA, 'Phylum') , sep = '__') %>% 
@@ -805,10 +848,6 @@ fungi_tax_fin <- tidyr::separate(tax_clean_fungi, Kingdom, c(NA, 'Kingdom') , se
   tidyr::separate(Genus, c(NA, 'Genus') , sep = '__') %>% 
   tidyr::separate(Species, c(NA, 'Species') , sep = '__')
 
-# Keep only Fungi 
-fungi_tax_fin <- fungi_tax_fin %>% 
-  dplyr::filter(Kingdom == "Fungi")
-
 # Rename the ASV_ID column. 
 fungi_tax_fin <- dplyr::rename(fungi_tax_fin, ASV_ID = seq_name_fungi)
 
@@ -817,31 +856,34 @@ base::row.names(fungi_tax_fin) <- fungi_tax_fin$ASV_ID
 
 fungi_tax_fin$sequence_fungi <- NULL
 fungi_tax_fin$ASV_ID <- NULL
-
 ```
 
-Load in the ASV table we curated. 
-
+The ITS is a genetic marker not only found in fungi, so we need to remove amplicons we are not interested in. 
+Before you do the removal have a look at which other things we assigned.
 ```{r, eval = F}
-# Load in ASV table previously curated using the LULU algorithm (https://doi.org/10.1038/s41467-017-01312-x).
-# For code on how it was employed see https://github.com/LukDrey/beech_micro_communities. 
-ASV_table_fungi_cur <- base::readRDS(here::here("ASV_table_fungi_cur.rds"))
-
-# Keep only samples that do represent real tree swabs. Cut Controls. 
-asv_fungi <- ASV_table_fungi_cur$curated_table %>% 
-  dplyr::select(all_of(base::rownames(metadata)))
+fungi_tax_fin <- fungi_tax_fin %>% 
+  dplyr::filter(Kingdom == "Fungi")
 ```
+> :memo: **Question 23:** List three other things that you foudn that are not fungi. 
 
-Load in some metadata. 
+We also need some metadata with information on the exploratories, tree species etc.. 
 
 ```{r, eval = F}
-# Load in Metadata. 
 metadata <- utils::read.csv(here::here('sample_data_3_AHS.csv'), sep = ';')
 
 # Set the sample name as the rowname for the phyloseq creation.
 base::row.names(metadata) <- metadata$sample
 metadata$sample <- NULL
 
+```
+In a next step we load in the ASV table we curated with LULU. 
+
+```{r, eval = F}
+ASV_table_fungi_cur <- base::readRDS(here::here("Data", "ASV_table_fungi_cur.rds"))
+
+# Keep only samples that do represent real tree swabs. Cut Controls. 
+asv_fungi <- ASV_table_fungi_cur$curated_table %>% 
+  dplyr::select(all_of(base::rownames(metadata)))
 ```
 
 Combine the data into a phyloseq object.  
@@ -852,7 +894,7 @@ Combine the data into a phyloseq object.
 asv_mat <- base::as.matrix(asv_fungi)
 taxmat <- base::as.matrix(fungi_tax_fin) 
   
-# Create the ps object. 
+# Create the phyloseq object. 
 ASV <- phyloseq::otu_table(asv_mat, taxa_are_rows = TRUE)
 TAX <- phyloseq::tax_table(taxmat)
 sampledata <- phyloseq::sample_data(metadata)
@@ -861,58 +903,27 @@ full_physeq <- phyloseq::phyloseq(ASV, TAX, sampledata)
 
 ```
 
-> :memo: **Question 19:** How many taxa does our phyloseq object contain now? 
+> :memo: **Question 24:** How many taxa does our phyloseq object contain now? 
   
-For our analysis we want to focus on the differences between soil and bark samples as well as differences between coniferous and deciduous trees. So we need to do a lot of splitting and filtering of the phyloseq objects. The coniferous tree species is not the same in the two regions of interest. It is *Picea abies* (Norway Spruce) in the Swabian Alb and *Pinus sylvestris* (Scots pine) in Schorfheide-Chorin, so we need to treat them differently. 
+For our analysis we want to focus on the differences between soil and bark samples as well as differences between coniferous and deciduous trees. So we need to do a lot of splitting and filtering of the phyloseq objects. We will only work within one region of the biodiversity exploratories, Schorfheide-Chorin in North-East Germany.  
 
 ```{r, eval = F}
-# Filter out samples that were sampled on trees that are not from our three target species. 
+# Filter out samples that were sampled on trees that are not from our two target species and from the other . 
 
-filtered_physeq <- phyloseq::subset_samples(full_physeq, 
+physeq_sch <- phyloseq::subset_samples(full_physeq, 
                                             dominant_tree %in% c("Fagus_sylvatica",
-                                                                 "Pinus_sylvestris", 
-                                                                 "Picea_abies")) %>% 
-  phyloseq::subset_samples(exploratory %in% c("Alb", "Schorfheide")) %>%
+                                                                 "Pinus_sylvestris")) %>% 
+  phyloseq::subset_samples(exploratory == "Schorfheide") %>%
   phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
 
-# Split the phyloseq object into the two exploratories.
-
-physeq_alb <- phyloseq::subset_samples(filtered_physeq, exploratory == "Alb") %>% 
-  phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
-
-physeq_sch <- phyloseq::subset_samples(filtered_physeq, exploratory == "Schorfheide") %>% 
-  phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
-
-# Split the phyloseq object into bark and soil samples. 
-physeq_bark <- phyloseq::subset_samples(filtered_physeq, substrate == "bark") %>% 
-  phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
-
-physeq_soil <- phyloseq::subset_samples(filtered_physeq, substrate == "soil") %>% 
-  phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
-
-# Split the phyloseq object into the two exploratories & the substrate.
-# Swabian Alb 
-physeq_alb_bark <- phyloseq::subset_samples(physeq_alb, substrate == "bark") %>% 
-  phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
-
-physeq_alb_soil <- phyloseq::subset_samples(physeq_alb, substrate == "soil") %>% 
-  phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
-
-# Schorfheide-Chorin
+# Split the data into soil and bark samples.
 physeq_sch_bark <- phyloseq::subset_samples(physeq_sch, substrate == "bark") %>% 
   phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
 
 physeq_sch_soil <- phyloseq::subset_samples(physeq_sch, substrate == "soil") %>% 
   phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
 
-# Split the phyloseqobject by exploratories & the tree species. 
-# Swabian Alb
-physeq_alb_fagus <- phyloseq::subset_samples(physeq_alb, dominant_tree == "Fagus_sylvatica") %>% 
-  phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
-
-physeq_alb_picea <- phyloseq::subset_samples(physeq_alb, dominant_tree == "Picea_abies") %>% 
-  phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
-
+# Split the phyloseqobject by tree species. 
 # Schorfheide Chorin
 physeq_sch_fagus <- phyloseq::subset_samples(physeq_sch, dominant_tree == "Fagus_sylvatica") %>% 
   phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
@@ -920,21 +931,7 @@ physeq_sch_fagus <- phyloseq::subset_samples(physeq_sch, dominant_tree == "Fagus
 physeq_sch_pinus <- phyloseq::subset_samples(physeq_sch, dominant_tree == "Pinus_sylvestris") %>% 
   phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
 
-# Split the phyloseq object into the two exploratories & the substrate & the tree species.
-# Swabian Alb
-physeq_alb_bark_fagus <- phyloseq::subset_samples(physeq_alb_bark, dominant_tree == "Fagus_sylvatica") %>% 
-  phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
-
-physeq_alb_soil_fagus <- phyloseq::subset_samples(physeq_alb_soil, dominant_tree == "Fagus_sylvatica") %>% 
-  phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
-
-physeq_alb_bark_picea <- phyloseq::subset_samples(physeq_alb_bark, dominant_tree == "Picea_abies") %>% 
-  phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
-
-physeq_alb_soil_picea <- phyloseq::subset_samples(physeq_alb_soil, dominant_tree == "Picea_abies") %>% 
-  phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
-
-# Schorfheide-Chorin
+# Split the phyloseq object into the the substrate & the tree species.
 physeq_sch_bark_fagus <- phyloseq::subset_samples(physeq_sch_bark, dominant_tree == "Fagus_sylvatica") %>% 
   phyloseq::prune_taxa(phyloseq::taxa_sums(.) > 0,.)
 
@@ -949,27 +946,13 @@ physeq_sch_soil_pinus <- phyloseq::subset_samples(physeq_sch_soil, dominant_tree
 
 ```
 
-> :memo: **Question 20:** How many taxa do the different splits contain? Make a little table. 
+> :memo: **Question 25:** How many taxa do the different splits contain? Make a little table. 
   
-# 10. Analysis of library sizes
+# 9. Analysis of library sizes
+
+We already have had a short look at how many reads we have per sample when we did the decontamination. To have a deeper look at the library sizes, and to judge if we have sequenced deep enough to find rare species, we can look at so-called rarefaction curves.
 
 ```{r; eval = F}
-################Swabian Alb###########################
-
-# Create a sample_data column containing a column that corresponds to tree species and substrate.
-physeq_alb_curve <- physeq_alb
-phyloseq::sample_data(physeq_alb_curve) <- phyloseq::sample_data(physeq_alb) %>% 
-  base::data.frame() %>%  
-  dplyr::mutate(tree_substrate = base::paste(dominant_tree, substrate, sep = "-"))
-
-# Create rarefaction curve and color the lines by substrate (bark/soil) and host tree species. 
-rare_alb <- ranacapa::ggrare(physeq_alb_curve, step = 50, color = "tree_substrate", se = FALSE) +
-  theme(legend.text = element_text(size = 4),
-        legend.title = element_blank(),
-        legend.key.size = unit(0.5, "cm"))
-
-################Schorfheide###########################
-
 # Create a sample_data column containing a column that corresponds to tree species and substrate.
 physeq_sch_curve <- physeq_sch
 phyloseq::sample_data(physeq_sch_curve) <- phyloseq::sample_data(physeq_sch) %>% 
@@ -979,67 +962,27 @@ phyloseq::sample_data(physeq_sch_curve) <- phyloseq::sample_data(physeq_sch) %>%
 # Create rarefaction curve and color the lines by substrate (bark/soil) and host tree species. 
 rare_sch <- ranacapa::ggrare(physeq_sch_curve, step = 50,
                              color = "tree_substrate", se = FALSE) +
-  theme(legend.text = element_text(size = 4),
+  theme(legend.text = element_text(size = 10),
         legend.title = element_blank(),
         legend.key.size = unit(0.5, "cm"))
 
-combined_rare_curves <- ggpubr::ggarrange(rare_alb, rare_sch,
-                                          ncol = 2, nrow = 1)
-combined_rare_curves
+rare_sch
 
 ```
 
-> :memo: **Question 21:** What differences can we see from these rarefaction curves?
+> :memo: **Question 26:** What differences can we see from these rarefaction curves?
   
-# 12. Community Composition
+# 10. Community Composition
 
-* Which taxa are in our dataset
+Some of the fundamental questions in community ecology is: Which taxa occur in my dataset? And more specific in each sample? And are their differences? 
+
+To get a first idea of this we can create a so-called community composition bar plot. It gives us a visual representation of what is in our sample and does one group occur more often then another. We plot this visualization on the taxonomic level of "Order", because it would be impossible to tell differences otherwise.
+
+For this purpose we need to transform our read counts into relative abundance (the proportion of how often a taxon occurs in the data) and find the 25 most abundant orders. 
+
+First we create a phyloseq object that is aggregated to the top 25 orders. 
 
 ```{r, eval = F}
-############## Swabian Alb ###############
-physeq_alb_barplot <- physeq_alb
-phyloseq::sample_data(physeq_alb_barplot) <- phyloseq::sample_data(physeq_alb) %>% 
-  base::data.frame() %>%  
-  dplyr::mutate(tree_substrate = base::paste(dominant_tree, substrate, sep = "-"))
-
-
-# Subset the phyloseq object to the top 24 orders and put the rest in 
-# a category "Others", based on relative abundance. 
-phy_alb_ord_top25 <- fantaxtic::top_taxa(physeq_alb_barplot,
-                                         tax_level = 'Order',
-                                         n_taxa =  24,
-                                         by_proportion = TRUE,
-                                         merged_label = "Other",
-                                         include_na_taxa = T) 
-phy_alb_ord_top25_named <- fantaxtic::name_na_taxa(phy_alb_ord_top25$ps_obj, include_rank = T)
-
-# Transform the subset dataset to compositional (relative) abundances.
-phy_alb_ord_top25_named_plot <-  phy_alb_ord_top25_named %>%
-  microbiome::aggregate_taxa(level = "Order") %>%  
-  microbiome::transform(transform = "compositional") 
-
-# Extract the names of the Orders.
-phyloseq::taxa_names(phy_alb_ord_top25_named_plot) <- phyloseq::tax_table(phy_alb_ord_top25_named_plot)[, 4]
-
-# Sort the taxa names alphabetically. 
-taxa_names_alb_ord <- base::sort(phyloseq::taxa_names(phy_alb_ord_top25_named_plot))
-
-# To get our desired plotting order and group names we need to change 
-# the exploratory names and order them as factors.
-sampledata_alb <- base::data.frame(phyloseq::sample_data(phy_alb_ord_top25_named_plot))
-sampledata_alb <- sampledata_alb %>% 
-  mutate(across("tree_substrate", stringr::str_replace, "Fagus_sylvatica-bark", "F. sylvatica bark")) %>% 
-  mutate(across("tree_substrate", stringr::str_replace, "Fagus_sylvatica-soil", "F. sylvatica soil")) %>% 
-  mutate(across("tree_substrate", stringr::str_replace, "Picea_abies-bark", "P. abies bark")) %>% 
-  mutate(across("tree_substrate", stringr::str_replace, "Picea_abies-soil", "P. abies soil")) 
-sampledata_alb$tree_substrate <- factor(sampledata_alb$tree_substrate, 
-                                       levels = c("F. sylvatica bark", "P. abies bark",
-                                                  "F. sylvatica soil", "P. abies soil"))  
-
-phyloseq::sample_data(phy_alb_ord_top25_named_plot) <- phyloseq::sample_data(sampledata_alb)
-
-
-############## Schorfheide-Chorin ###############
 physeq_sch_barplot <- physeq_sch
 phyloseq::sample_data(physeq_sch_barplot) <- phyloseq::sample_data(physeq_sch) %>% 
   base::data.frame() %>%  
@@ -1055,20 +998,29 @@ phy_sch_ord_top25 <- fantaxtic::top_taxa(physeq_sch_barplot,
                                          merged_label = "Other",
                                          include_na_taxa = T) 
 phy_sch_ord_top25_named <- fantaxtic::name_na_taxa(phy_sch_ord_top25$ps_obj, include_rank = T)
+```
 
+Afterwards we transform the read counts from our ASV table to relative abundances. 
+```{r, eval = F}
 # Transform the subset dataset to compositional (relative) abundances.
 phy_sch_ord_top25_named_plot <-  phy_sch_ord_top25_named %>%
   microbiome::aggregate_taxa(level = "Order") %>%  
   microbiome::transform(transform = "compositional") 
+```
 
+Then we need to extract the names of the 25 orders.
+
+```{r, eval = F}
 # Extract the names of the Orders.
 phyloseq::taxa_names(phy_sch_ord_top25_named_plot) <- phyloseq::tax_table(phy_sch_ord_top25_named_plot)[, 4]
 
 # Sort the taxa names alphabetically. 
 taxa_names_sch_ord <- sort(phyloseq::taxa_names(phy_sch_ord_top25_named_plot))
+```
 
-# To get our desired plotting order and group names we need to change 
-# the exploratory names and order them as factors.
+To get our desired plotting order and group names we need to change the exploratory names and order them as factors.
+
+```{r, eval = F}
 sampledata_sch <- data.frame(phyloseq::sample_data(phy_sch_ord_top25_named_plot))
 sampledata_sch <- sampledata_sch %>% 
   mutate(across("tree_substrate", stringr::str_replace, "Fagus_sylvatica-bark", "F. sylvatica bark")) %>% 
@@ -1081,50 +1033,19 @@ sampledata_sch$tree_substrate <- factor(sampledata_sch$tree_substrate,
                                                    "F. sylvatica soil", "P. sylvestris soil"))  
 
 phyloseq::sample_data(phy_sch_ord_top25_named_plot) <- phyloseq::sample_data(sampledata_sch)
+```
 
+To create some nice plots we need to define some colors and a function that fills the bars that we create.
 
-#################################################################
-##                          Section 8.2                        ##
-##              Create great looking plots                     ##
-#################################################################
+```{r, eval = F}
+my_cols <- paletteer::paletteer_d('ggsci::default_igv')
 
-my_cols <- Polychrome::createPalette(33, seedcolors = c("#ff0000", "#00ff00", "#0000ff"))
+unique_orders <- sort(unique(taxa_names_sch_ord)) 
 
-unique_orders <- sort(unique(c(taxa_names_alb_ord, taxa_names_sch_ord))) 
-
-custom_sort <- c("Agaricales", "Archaeorhizomycetales",
-                 "Atheliales", "Boletales",
-                 "Caliciales", "Cantharellales",
-                 "Capnodiales", "Chaetothyriales",
-                 "Eurotiales", "Filobasidiales",
-                 "Helotiales", "Hypocreales",
-                 "Lecanorales", "Mortierellales",
-                 "Mycosphaerellales", "Mytilinidales",
-                 "Orbiliales", "Pezizales", "Phaeothecales",
-                 "Pleosporales", "Russulales",
-                 "Sebacinales", "Thelebolales",
-                 "Thelephorales", "Trapeliales", 
-                 "Tremellales", "Umbelopsidales", "Verrucariales",
-                 "Unknown Ascomycota (Phylum)", "Unknown Dothideomycetes (Class)",
-                 "Unknown Fungi (Kingdom)", "Unknown Rozellomycota (Phylum)",
-                              "Other")
-
-full_cols <- data.frame(order = custom_sort, color = my_cols)
-
-alb_cols <- full_cols %>% 
-  dplyr::filter(order %in% taxa_names_alb_ord)
+full_cols <- data.frame(order = unique_orders, color = my_cols[1:25])
 
 sch_cols <- full_cols %>% 
   dplyr::filter(order %in% taxa_names_sch_ord)
-
-
-scale_fill_alb <- function(...){
-  ggplot2:::manual_scale(
-    'fill', 
-    values = setNames(alb_cols$color, alb_cols$order), 
-    ...
-  )
-}
 
 scale_fill_sch <- function(...){
   ggplot2:::manual_scale(
@@ -1133,71 +1054,13 @@ scale_fill_sch <- function(...){
     ...
   )
 }
+```
 
-############## Swabian Alb ###############
+Now we can use functionality from a package called ggplot2. It lets you control a lot of the things in the plot. We create a two plots: One for the soil and one for the bark microbiome. We have two subplots within them, one for the beech trees and one for the pine trees.
 
-# Custom plotting to make a nice stacked barplot. 
-alb_ord_soil_plots <- phyloseq::subset_samples(phy_alb_ord_top25_named_plot, substrate == "soil") %>%
-  microbiome::plot_composition(group_by =  'tree_substrate', otu.sort = alb_cols$order) +
-  scale_fill_alb() +
-  guides(fill = guide_legend(title.position = 'top', nrow = 3)) +
-  theme(panel.grid.major.x = element_blank(), 
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(),
-        axis.line = element_blank(),
-        axis.ticks = element_line(colour = 'black', size = 0.5),
-        axis.text.x =  element_blank(),
-        axis.text.y =  element_text(colour = "black", size = 10),
-        axis.title = element_text(colour = "black", size = 10),
-        legend.position = 'bottom', 
-        plot.title = element_text(vjust = -4, hjust = 0.03), 
-        legend.text = element_text(colour = 'black', size = 7),
-        legend.title =  element_text(size = 10),
-        legend.key.size = unit(2.5, 'mm'),
-        axis.ticks.length.x = unit(-0.2, "cm"), 
-        legend.box.spacing = unit(-4, 'mm'),
-        text = element_text(colour = 'black', size = 20),
-        strip.text = element_text(face = "italic")) + 
-  xlab('Sample') +
-  ylab('Relative Abundance') + 
-  labs(subtitle = "(B)")  
-alb_ord_soil_plots
-
-# Custom plotting to make a nice stacked barplot. 
-alb_ord_bark_plots <- phyloseq::subset_samples(phy_alb_ord_top25_named_plot, substrate == "bark") %>%
-  microbiome::plot_composition(group_by =  'tree_substrate', otu.sort = alb_cols$order) +
-  scale_fill_alb() +
-  guides(fill = guide_legend(title = 'Order',title.position = 'top', ncol = 10)) +
-  theme(panel.grid.major.x = element_blank(), 
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(),
-        axis.line = element_blank(),
-        axis.ticks = element_line(colour = 'black', size = 0.5),
-        axis.text.x =  element_blank(),
-        axis.text.y =  element_text(colour = "black", size = 10),
-        axis.title.x = element_text(colour = "black", size = 10),
-        axis.title.y = element_text(colour = "black", size = 10),
-        legend.position = 'bottom',
-        text = element_text(colour = 'black', size = 20), 
-        plot.title = element_text(vjust = -4, hjust = 0.03), 
-        legend.text = element_text(colour = 'black', size = 5),
-        legend.title =  element_text("Order",size = 8),
-        legend.key.size = unit(1, 'mm'),
-        axis.ticks.length.x = unit(-0.2, "cm"), 
-        legend.box.spacing = unit(-4, 'mm'),
-        strip.text = element_text(face = "italic")) + 
-  xlab('Sample') +
-  ylab('Relative Abundance') + 
-  labs(subtitle = "(A) Swabian Alb")
-alb_ord_bark_plots
-
-############## Schorfheide-Chorin ###############
-
-# Custom plotting to make a nice stacked barplot. 
+```{r, eval = F}
 sch_ord_soil_plots <- phyloseq::subset_samples(phy_sch_ord_top25_named_plot, substrate == "soil") %>% 
-  microbiome::plot_composition(group_by =  'tree_substrate', otu.sort = sch_cols$order) +
+  microbiome::plot_composition(group_by =  'tree_substrate', otu.sort = "abundance") +
   scale_fill_sch() +
   guides(fill = guide_legend(title.position = 'top', ncol = 10)) +
   theme(panel.grid.major.x = element_blank(), 
@@ -1220,12 +1083,11 @@ sch_ord_soil_plots <- phyloseq::subset_samples(phy_sch_ord_top25_named_plot, sub
         text = element_text(colour = 'black', size = 20),
         strip.text = element_text(face = "italic")) + 
   xlab('Sample') +
-  ylab('Relative Abundance') + 
-  labs(subtitle = "(B)")   
+  ylab('Relative Abundance') 
 sch_ord_soil_plots
 
 sch_ord_bark_plots <- phyloseq::subset_samples(phy_sch_ord_top25_named_plot, substrate == "bark") %>% 
-  microbiome::plot_composition(group_by =  'tree_substrate', otu.sort = sch_cols$order) +
+  microbiome::plot_composition(group_by =  'tree_substrate', otu.sort = "abundance") +
   scale_fill_sch() +
   guides(fill = guide_legend(title = 'Order',title.position = 'top', ncol = 10)) +
   theme(panel.grid.major.x = element_blank(), 
@@ -1241,146 +1103,74 @@ sch_ord_bark_plots <- phyloseq::subset_samples(phy_sch_ord_top25_named_plot, sub
         legend.position = 'bottom',
         text = element_text(colour = 'black', size = 20), 
         plot.title = element_text(vjust = -4, hjust = 0.03), 
-        legend.text = element_text(colour = 'black', size = 5),
+        legend.text = element_text(colour = 'black', size = 7),
         legend.title =  element_text("Order",size = 8),
         legend.key.size = unit(1, 'mm'),
         axis.ticks.length.x = unit(-0.2, "cm"), 
         legend.box.spacing = unit(-4, 'mm'),
         strip.text = element_text(face = "italic")) + 
   xlab('Sample') +
-  ylab('Relative Abundance') + 
-  labs(subtitle = "(A) Schorfheide-Chorin") 
+  ylab('Relative Abundance') 
 sch_ord_bark_plots
-
-######## Create final arranged plot #######
-
-final_alb_community_barplot <- ggpubr::ggarrange(alb_ord_bark_plots, alb_ord_soil_plots,
-                                                 ncol = 1, nrow = 2, hjust = 5,
-                                                 legend = "bottom", common.legend = TRUE)
-final_alb_community_barplot
-
-ggsave('final_alb_community_barplot.jpeg', device = 'jpeg',
-       final_alb_community_barplot, width = 180, height = 140,
-       units = 'mm', dpi = 300)
-
-final_sch_community_barplot <- ggpubr::ggarrange(sch_ord_bark_plots, sch_ord_soil_plots,
-                                                 ncol = 1, nrow = 2,
-                                                 legend = "bottom", common.legend = TRUE)
-final_sch_community_barplot
-
-ggsave('final_sch_community_barplot.jpeg', device = 'jpeg',
-       final_sch_community_barplot, width = 180, height = 140,
-       units = 'mm', dpi = 300)
-
-
-combined_community_barplot <- ggpubr::ggarrange(final_alb_community_barplot,
-                                                final_sch_community_barplot, 
-                                                ncol = 1, nrow = 2)
-combined_community_barplot
 ```
 
-# 13. Differences in community composition/beta diversity between bark and soil
+> :memo: **Question 27:** What are the most abundant orders in each tree species in a) soil and b) bark?
 
-* We can see that there are differences between trees but are they really there? 
+# 11. Differences in community composition/beta diversity between bark and soil
+
+We can see from the previous plots that there are differences between tree species and substrates. But are they really meaningful or is it just something we can visually distinguish but is not statistically significant?
+
+But first let us look at another method to visually represent differences between groups: Ordination. 
+Ordinations are based on a distance measure between samples and groups. The distance measure indicates how different the trees are in the abundance and number of the ASVs. A common measure that we are going to use here is Bray-Curtis dissimilarity. It looks at abundances of taxa that two samples share and the number found in each sample. If both samples share the same number of ASVs, with the same abundance, the dissimilarity will be zero. We can than ordinate the samples with an approach called Non-Metric Multidimensional Scaling. This approach ranks how dissimilar samples are to each other and plots them in a 2D space.
 
 ```{r, eval = F}
-#########################NMDS-Ordination############################
-# Ordinate the Swabian Alb phyloseq using an NMDS with Bray-Curtis distance.
-nmds_alb <- phyloseq::ordinate(physeq_alb, method = "NMDS", distance = "bray")
-
-# Plot the ordination. 
-ordination_alb <- phyloseq::plot_ordination(physeq_alb, nmds_alb, type="samples", color="dominant_tree", shape="substrate") + 
-  ggplot2::geom_point(size = 4) +
-  ggplot2::stat_ellipse(ggplot2::aes(group = dominant_tree), linetype = 2) +
-  ggplot2::scale_colour_manual(values = c("green","darkgreen"), name = "dominant tree species",
-                               labels = c("Fagus sylvatica", "Picea abies")) +
-  ggplot2::labs(subtitle = "(A) Swabian Alb") +
-  ggplot2::theme(legend.position = "none",
-        axis.text = ggplot2::element_text(size = 15),
-        axis.title = ggplot2::element_text(size = 15))
-
-ordination_alb
-
 # Ordinate the Schorfheide-Chorin phyloseq using an NMDS with Bray-Curtis distance.
 nmds_sch <- phyloseq::ordinate(physeq_sch, method = "NMDS", distance = "bray")
 
-# Plot the ordination.
-ordination_sch <- phyloseq::plot_ordination(physeq_sch, nmds_sch, type="samples", color="dominant_tree", shape="substrate") + 
+# Plot the ordination and enclose the 95% confidence intervals around the group of tree species.
+ordination_sch_tree <- phyloseq::plot_ordination(physeq_sch, nmds_sch, type="samples", color="dominant_tree", shape="substrate") + 
   ggplot2::geom_point(size = 4) +
   ggplot2::stat_ellipse(ggplot2::aes(group = dominant_tree), linetype = 2) +
   ggplot2::scale_colour_manual(values = c("green","darkolivegreen4"), name = "dominant tree species",
                                labels = c("Fagus sylvatica", "Pinus sylvestris")) +
   ggplot2::labs(subtitle = "(B) Schorfheide-Chorin") +
-  ggplot2::theme(legend.position = "none",
+  ggplot2::theme(legend.position = "right",
         axis.text = ggplot2::element_text(size = 15), 
         axis.title = ggplot2::element_text(size = 15))
 
-ordination_sch
+ordination_sch_tree
 
-# Run the ordination on the full dataset to grab a nice legend. 
-full_ordination_ps <- filtered_physeq
-sample_data(full_ordination_ps) <- data.frame(sample_data(full_ordination_ps)) %>% 
-  dplyr::rename(habitat = substrate)
-
-nmds_full <- phyloseq::ordinate(full_ordination_ps, method = "NMDS", distance = "bray")
-
-ordination_full <- phyloseq::plot_ordination(full_ordination_ps, nmds_full,
-                                             type="samples", color="dominant_tree", shape="habitat") + 
+# Plot the ordination and enclose the 95% confidence intervals around the group of substrate.
+ordination_sch_substrate <- phyloseq::plot_ordination(physeq_sch, nmds_sch, type="samples", color="dominant_tree", shape="substrate") + 
   ggplot2::geom_point(size = 4) +
-  ggplot2::stat_ellipse(ggplot2::aes(group = dominant_tree), linetype = 2) +
-  ggplot2::scale_colour_manual(values = c("green", "darkgreen", "darkolivegreen4"), name = "tree species",
-                               labels = c("Fagus sylvatica","Picea abies", "Pinus sylvestris")) +
-  ggplot2::theme(legend.text = ggplot2::element_text(face = "italic", size = 9),
-        legend.title = ggplot2::element_text(size = 8, face = "bold"),
-        legend.position = "right",
-        legend.direction = "vertical",
-        legend.spacing = ggplot2::unit(2,"cm"),
+  ggplot2::stat_ellipse(ggplot2::aes(group = substrate), linetype = 2) +
+  ggplot2::scale_colour_manual(values = c("green","darkolivegreen4"), name = "dominant tree species",
+                               labels = c("Fagus sylvatica", "Pinus sylvestris")) +
+  ggplot2::labs(subtitle = "(B) Schorfheide-Chorin") +
+  ggplot2::theme(legend.position = "right",
         axis.text = ggplot2::element_text(size = 15), 
-        axis.title = ggplot2::element_text(size = 15)) 
+        axis.title = ggplot2::element_text(size = 15))
 
-ordination_full
+ordination_sch_substrate
 
-# Extract the legend and store it as a ggplot object. 
-ordination_legend <- ggpubr::get_legend(ordination_full)
+```
 
-# Combine the figures into one plot. 
-ordination_final <- ggpubr::ggarrange(ordination_alb, ordination_sch,
-                                      ncol = 1, nrow = 2,
-                                      legend = "right", legend.grob = ordination_legend)
-ordination_final
+With the dissimilarity/distance measure we can now also test if our groups (tree species & substrate) are really different statistically. To do so we run an analysis called PERMANOVA: a permutational multivariate analysis of variance. It works in a way that it decomposes the dissimilarity matrix into variation within and between the groups. 
 
-ggsave('ordination_final.jpeg', device = 'jpeg',
-       ordination_final, width = 180, height = 150,
-        units = 'mm', dpi = 300)
-#########################PERMANOVA and Betadisper############################
-# Swabian Alb
-
-bray_mat_alb <- phyloseq::distance(physeq_alb, method = "bray")
-# Run the PERMANOVA analysis thorugh vegans adonis2() including both effects of habitat and tree species.
-vegan::adonis2(bray_mat_alb ~ factor(phyloseq::sample_data(physeq_alb)$substrate) +
-                 factor(phyloseq::sample_data(physeq_alb)$dominant_tree), by = 'margin')
-
-# Test the within group dispersion for the substrate.
-dispr_substrate_alb <- vegan::betadisper(bray_mat_alb, 
-                                          factor(phyloseq::sample_data(physeq_alb)$substrate))
-dispr_substrate_alb
-
-permutest(dispr_substrate_alb)
-
-# Test the within group dispersion for the tree Species.
-dispr_tree_alb <- vegan::betadisper(bray_mat_alb, 
-                                         factor(phyloseq::sample_data(physeq_alb)$dominant_tree))
-dispr_tree_alb
-
-permutest(dispr_tree_alb)
-
-# Schorfheide-Chorin 
-
+```{r, eval = F}
+# We need to calculate a distance matrix first.
 bray_mat_sch <- phyloseq::distance(physeq_sch, method = "bray")
-# Run the PERMANOVA analysis thorugh vegans adonis2() including both effects of habitat and tree species.
+
+# Run the PERMANOVA analysis through vegans adonis2() including both effects of habitat and tree species.
 vegan::adonis2(bray_mat_sch ~ factor(phyloseq::sample_data(physeq_sch)$substrate) +
                  factor(phyloseq::sample_data(physeq_sch)$dominant_tree), by = 'margin')
 
+# We can see that both have significant differences. 
+
+```
+
+PERMANOVA results might have been confounded if the groups have very different distributions around there centers. So to see if our results are reliable we have to test these dispersions.  
+```{r, eval = F}
 # Test the within group dispersion for the substrate.
 dispr_substrate_sch <- vegan::betadisper(bray_mat_sch, 
                                          factor(phyloseq::sample_data(physeq_sch)$substrate))
@@ -1398,12 +1188,5 @@ vegan::permutest(dispr_tree_sch)
 ```
 
 > :memo: **Question 22:** What other options can you find for distance measures between samples? 
-> :memo: **Question 23:** Are there other ordination methods apart from NMDS? 
-> :memo: **Question 24:** What about the compositionality of the sequencing data? 
+> :memo: **Question 23:** Are there other ordination methods apart from NMDS?  
 > :memo: **Question 25:** Are there statistically meaningful differences between substrates? Between tree species? 
-
-  
-  
-# Questions 
-
- * what can you not do with this data 
