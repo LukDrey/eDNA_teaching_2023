@@ -3,7 +3,7 @@ authors: "Lukas Dreyling & Henrique Valim"
 date: "13-16.11.2023"
 ---
 
-# 2023 Mycology Master's module (Evo-3-VS, Evo-3-P) eDNA barcoding pipeline
+# 2023 Mycology Master's module (Biodiversity and Ecosystem Health) eDNA barcoding pipeline
 
 The purpose of this pipeline is to process Illumina (MiSeq 2 x 300 bp) metabarcoding data of soil and bark samples taken from the SYMBIODRIVE project of the Biodiversity Exploratories in the frame of the Mycology Masters Course at the Goethe University Frankfurt. 
 
