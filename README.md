@@ -971,8 +971,71 @@ rare_sch
 ```
 
 > :memo: **Question 26:** What differences can we see from these rarefaction curves?
+
+# 10. Alpha Diversity
+
+A first interesting diversity question might be if substrates or tree species differ in their number of species (richness) or diversity (e.g. Shannon diversity). We can easily calculate both measures with build-in phyloseq functions and then visually compare them with simple boxplots. 
+
+First we calculate the diversity measures and add them to the phyloseq object so we have all other sample information as well
+```{r, eval = F}
+# Calculate the diversity measures.
+div_fun <- estimate_richness(phy_fungi_sch, split = T, measures = c('Observed, 'Shannon')
+
+# Make a new sample_data object and merge with existing phyloseq object.
+new_var_fun <- sample_data(div_fun)
+phy_fungi <- merge_phyloseq(phy_fungi, new_var_fun)
+
+fungi_sampledata <- sample_data(phy_fungi)
+```
+
+Now we can use the data to create several boxplots. First we look at the differences in tree species.
+```{r, eval = F}
+fun_box_tree_shannon <- ggplot(fungi_sampledata, aes(x = dominant_tree, y = Shannon, fill = dominant_tree, colour = dominant_tree)) + 
+  geom_boxplot(
+    width = .15, 
+    ## remove outliers
+    outlier.color = NA, ## `outlier.shape = NA` works as well 
+    alpha = 0.5,
+    size = 0.1
+  )
+fun_box_tree_shannon  
+
+fun_box_tree_richness <- ggplot(fungi_sampledata, aes(x = dominant_tree, y = Shannon, fill = dominant_tree, colour = dominant_tree)) + 
+  geom_boxplot(
+    width = .15, 
+    ## remove outliers
+    outlier.color = NA, ## `outlier.shape = NA` works as well 
+    alpha = 0.5,
+    size = 0.1
+  )
+fun_box_tree_richness  
+```  
+And we can also look at the differences between substrates.
+```{r, eval = F}
+fun_box_substrate_shannon <- ggplot(fungi_sampledata, aes(x = substrate, y = Shannon, fill = substrate, colour = substrate)) + 
+  geom_boxplot(
+    width = .15, 
+    ## remove outliers
+    outlier.color = NA, ## `outlier.shape = NA` works as well 
+    alpha = 0.5,
+    size = 0.1
+  )
+fun_box_substrate_shannon  
+
+fun_box_substrate_richness <- ggplot(fungi_sampledata, aes(x = substrate, y = Shannon, fill = substrate, colour = substrate)) + 
+  geom_boxplot(
+    width = .15, 
+    ## remove outliers
+    outlier.color = NA, ## `outlier.shape = NA` works as well 
+    alpha = 0.5,
+    size = 0.1
+  )
+fun_box_substrate_richness  
+```
+> :memo: **Question 27:** What differences can you see? 
+
   
-# 10. Community Composition
+# 11. Community Composition
 
 Some of the fundamental questions in community ecology is: Which taxa occur in my dataset? And more specific in each sample? And are their differences? 
 
@@ -1114,9 +1177,9 @@ sch_ord_bark_plots <- phyloseq::subset_samples(phy_sch_ord_top25_named_plot, sub
 sch_ord_bark_plots
 ```
 
-> :memo: **Question 27:** What are the most abundant orders in each tree species in a) soil and b) bark?
+> :memo: **Question 28:** What are the most abundant orders in each tree species in a) soil and b) bark?
 
-# 11. Differences in community composition/beta diversity between bark and soil
+# 12. Differences in community composition/beta diversity between bark and soil
 
 We can see from the previous plots that there are differences between tree species and substrates. But are they really meaningful or is it just something we can visually distinguish but is not statistically significant?
 
@@ -1187,6 +1250,6 @@ vegan::permutest(dispr_tree_sch)
 
 ```
 
-> :memo: **Question 22:** What other options can you find for distance measures between samples? 
-> :memo: **Question 23:** Are there other ordination methods apart from NMDS?  
-> :memo: **Question 25:** Are there statistically meaningful differences between substrates? Between tree species? 
+> :memo: **Question 29:** What other options can you find for distance measures between samples? 
+> :memo: **Question 30:** Are there other ordination methods apart from NMDS?  
+> :memo: **Question 31:** Are there statistically meaningful differences between substrates? Between tree species? 
