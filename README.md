@@ -819,7 +819,7 @@ First we load in the taxonomy table we have created with DADA2.
 
 ```{r, eval = F}
 # Load in taxonomy table. 
-tax_fungi <- base::readRDS(here::here("tax_table_fungi.rds")) %>% 
+tax_fungi <- base::readRDS(here::here("Databases", "tax_table_fungi.rds")) %>% 
   base::as.data.frame() %>%
   tibble::rownames_to_column('sequence') %>%
   dplyr::rename(sequence_fungi = sequence)
