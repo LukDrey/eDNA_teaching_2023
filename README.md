@@ -665,7 +665,8 @@ Load in the data.
 
 ```{r, eval = F}
 # Load in the ASV table for the fungi.
-fungi_asv <- readRDS(here("asv_table_fungi.rds")) %>% 
+fungi_asv <- readRDS(here("asv_table_fungi.rds")) %>%
+t() %>%
 as.data.frame() %>% 
 tibble::rownames_to_column(var = "sequence_fungi")
 
