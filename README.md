@@ -30,6 +30,8 @@ Most of our analyses will be done in [R](https://www.r-project.org/) using the [
 Specific tools in R come in "packages" that we need to install and load into our working environment. 
 
   * [dada2](https://benjjneb.github.io/dada2/): Accurate, high-resolution sample inference from amplicon sequencing data (denoising, filtering, clustering of amplicon sequence variants [ASVs] and assigning taxonomy)
+  * [decontam](https://benjjneb.github.io/decontam/): Identifying and removing potential contaminants.
+  * [LULU](https://github.com/tobiasgf/lulu): Distribution based post clustering curation of amplicon data.
   * [ShortRead](https://kasperdanielhansen.github.io/genbioconductor/html/ShortRead.html): FASTQ input and manipulation (reading and examining raw sequence reads)
   * [Biostrings](https://bioconductor.org/packages/release/bioc/html/Biostrings.html): Efficient manipulation of biological strings (reading and examining sequence data)
   * [phyloseq](https://joey711.github.io/phyloseq/): Explore microbiome profiles using R (useful for getting our data into a format that works with many other packages)
@@ -39,6 +41,7 @@ Specific tools in R come in "packages" that we need to install and load into our
   * [fantaxtic](https://github.com/gmteunisse/fantaxtic): Nested bar plots for phyloseq data 
   * [here](https://here.r-lib.org/): Package for easy file referencing for reproducible workflows
   * [microbiome](https://microbiome.github.io/tutorials/): Microbiome analytics
+  * [ranacapa](https://github.com/gauravsk/ranacapa): We'll use this for some evaluation plots.
 
 # 1. Adapter Trimming 
 
