@@ -670,7 +670,7 @@ as.data.frame() %>%
 tibble::rownames_to_column(var = "sequence_fungi")
 
 # Load in the FASTA file so we can get the ASV_IDs.
-fungi_seqs_fasta <- Biostrings::readDNAStringSet(here::here("Data", 'ASVs_fungi.fa'))
+fungi_seqs_fasta <- Biostrings::readDNAStringSet(here::here('ASVs_fungi.fa'))
 
 # Then we combine the sequences and their corresponding ASV IDs in a dataframe. 
 seq_name_fungi <- base::names(fungi_seqs_fasta)
