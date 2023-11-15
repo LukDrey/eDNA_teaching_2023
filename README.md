@@ -825,7 +825,7 @@ tax_fungi <- base::readRDS(here::here("Data", "tax_table_fungi.rds")) %>%
   dplyr::rename(sequence_fungi = sequence)
 
 # Load the fungal reads.
-fungi_seqs_fasta <- Biostrings::readDNAStringSet(here::here('ASVs_fungi.fa'))
+fungi_seqs_fasta <- Biostrings::readDNAStringSet(here::here("Data",'ASVs_fungi.fa'))
 
 # Make a dataframe of the sequences and their ASV ID. 
 seq_name_fungi <- base::names(fungi_seqs_fasta)
