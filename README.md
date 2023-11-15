@@ -819,7 +819,7 @@ First we load in the taxonomy table we have created with DADA2.
 
 ```{r, eval = F}
 # Load in taxonomy table. 
-tax_fungi <- base::readRDS(here::here("Databases", "tax_table_fungi.rds")) %>% 
+tax_fungi <- base::readRDS(here::here("Data", "tax_table_fungi.rds")) %>% 
   base::as.data.frame() %>%
   tibble::rownames_to_column('sequence') %>%
   dplyr::rename(sequence_fungi = sequence)
@@ -868,7 +868,7 @@ Before you do the removal have a look at which other things we assigned.
 fungi_tax_fin <- fungi_tax_fin %>% 
   dplyr::filter(Kingdom == "Fungi")
 ```
-> :memo: **Question 23:** List three other things that you foudn that are not fungi. 
+> :memo: **Question 23:** List three other things that you found that are not fungi. 
 
 We also need some metadata with information on the exploratories, tree species etc.. 
 
