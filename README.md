@@ -623,7 +623,7 @@ saveRDS(seqtab_merge.nochim, 'asv_table_fungi.rds')
 
 # 6. Taxonomy assignment 
 
-DADA2 also has built in functionality to assign taxonomy to our ASVs. To do so we need a database that contains sequence information and the corresponding information on taxonomy like the different taxonomic ranks. One of these, and the most commonly used for fungi, is the [UNITE](https://unite.ut.ee/index.php) database. Unfortunately we cannot run these commands on the local computers, because the process is to memory-intensive. We have run the command for you and you can find it in the folder Databases.
+DADA2 also has built in functionality to assign taxonomy to our ASVs. To do so we need a database that contains sequence information and the corresponding information on taxonomy like the different taxonomic ranks. One of these, and the most commonly used for fungi, is the [UNITE](https://unite.ut.ee/index.php) database. Unfortunately we cannot run these commands on the local computers, because the process is too memory-intensive. We have run the command for you and you can find it in the folder Databases.
 
 Here is how you would do the taxonomy assignment. :no_entry:*PLEASE DO NOT RUN THIS*:no_entry:
 ```{r, eval = F}
@@ -665,7 +665,7 @@ Load in the data.
 
 ```{r, eval = F}
 # Load in the ASV table for the fungi.
-fungi_asv <- readRDS(here("Data", "asv_table_fungi.rds")) %>% 
+fungi_asv <- readRDS(here("asv_table_fungi.rds")) %>% 
 as.data.frame() %>% 
 tibble::rownames_to_column(var = "sequence_fungi")
 
