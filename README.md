@@ -833,7 +833,7 @@ sequence_fungi <- base::paste(fungi_seqs_fasta)
 fungi_rep_seqs <- base::data.frame(seq_name_fungi, sequence_fungi)
 
 # Join the taxonomy table and the representative sequences
-tax_clean_fungi <- dplyr::left_join(tax_fungi, fungi_rep_seqs, by = 'sequence_fungi')
+tax_clean_fungi <- dplyr::left_join(tax_fungi, fungi_rep_seqs, by = 'sequence_fungi') %>% drop.na(seq_name_fungi)
 
 ```
 
