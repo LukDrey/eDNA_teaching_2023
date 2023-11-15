@@ -873,7 +873,7 @@ fungi_tax_fin <- fungi_tax_fin %>%
 We also need some metadata with information on the exploratories, tree species etc.. 
 
 ```{r, eval = F}
-metadata <- utils::read.csv(here::here('sample_data_3_AHS.csv'), sep = ';')
+metadata <- utils::read.csv(here::here("Data",'sample_data_3_AHS.csv'), sep = ';')
 
 # Set the sample name as the rowname for the phyloseq creation.
 base::row.names(metadata) <- metadata$sample
