@@ -1004,7 +1004,7 @@ fun_box_tree_shannon <- ggplot(fungi_sampledata, aes(x = dominant_tree, y = Shan
   )
 fun_box_tree_shannon  
 
-fun_box_tree_richness <- ggplot(fungi_sampledata, aes(x = dominant_tree, y = Shannon, fill = dominant_tree, colour = dominant_tree)) + 
+fun_box_tree_richness <- ggplot(fungi_sampledata, aes(x = dominant_tree, y = Observed, fill = dominant_tree, colour = dominant_tree)) + 
   geom_boxplot(
     width = .15, 
     ## remove outliers
