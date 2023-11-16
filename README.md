@@ -1043,9 +1043,9 @@ fun_box_substrate_richness
 
 Some fundamental questions in community ecology are: Which taxa occur in a particular dataset? Which taxa are more specific (e.g. unique to) each sample? And are there differences? 
 
-To get a first clue as to the answer to these questions, we can create a community composition bar plot. This will give us a visual representation of what is in our sample, and whether or not one group occurs more often than another. We plot this visualization at the "Order" taxonomic level, because we would not have enough information to resolve differences otherwise.
+To get a first clue as to the answer to these questions, we can create a community composition bar plot. This will give us a visual representation of what is in our sample, and whether or not one group occurs more often than another. We plot this visualization at the "Order" taxonomic level, because we would not have enough information to clearly resolve differences otherwise.
 
-For this purpose we need to transform our read counts into relative abundance (the proportion of how often a taxon occurs in the data) and find the 25 most abundant orders. 
+For this purpose, we need to transform our read counts into relative abundances (the proportion of how often a taxon occurs in the data) and find the 25 most abundant orders. 
 
 First we create a phyloseq object that is aggregated to the top 25 orders. 
 
@@ -1067,7 +1067,7 @@ phy_sch_ord_top25 <- fantaxtic::top_taxa(physeq_sch_barplot,
 phy_sch_ord_top25_named <- fantaxtic::name_na_taxa(phy_sch_ord_top25$ps_obj, include_rank = T)
 ```
 
-Afterwards we transform the read counts from our ASV table to relative abundances. 
+Afterwards, we transform the read counts from our ASV table to relative abundances. 
 ```{r, eval = F}
 # Transform the subset dataset to compositional (relative) abundances.
 phy_sch_ord_top25_named_plot <-  phy_sch_ord_top25_named %>%
@@ -1085,7 +1085,7 @@ phyloseq::taxa_names(phy_sch_ord_top25_named_plot) <- phyloseq::tax_table(phy_sc
 taxa_names_sch_ord <- sort(phyloseq::taxa_names(phy_sch_ord_top25_named_plot))
 ```
 
-To get our desired plotting order and group names we need to change the exploratory names and order them as factors.
+To get our desired plotting order and group names, we need to change the exploratory names and order them as factors.
 
 ```{r, eval = F}
 sampledata_sch <- data.frame(phyloseq::sample_data(phy_sch_ord_top25_named_plot))
@@ -1102,7 +1102,7 @@ sampledata_sch$tree_substrate <- factor(sampledata_sch$tree_substrate,
 phyloseq::sample_data(phy_sch_ord_top25_named_plot) <- phyloseq::sample_data(sampledata_sch)
 ```
 
-To create some nice plots we need to define some colors and a function that fills the bars that we create.
+To create some nice plots, we will need to define some colors and a function that fills the bars that we create.
 
 ```{r, eval = F}
 my_cols <- paletteer::paletteer_d('ggsci::default_igv')
@@ -1123,7 +1123,7 @@ scale_fill_sch <- function(...){
 }
 ```
 
-Now we can use functionality from a package called ggplot2. It lets you control a lot of the things in the plot. We create a two plots: One for the soil and one for the bark microbiome. We have two subplots within them, one for the beech trees and one for the pine trees.
+Now we can use functionality from a package called ggplot2. This will let us manipulate a lot of the elements in the plot to suit our visualization needs. We create two plots: One for the soil and one for the bark microbiome. We will then have two subplots within them, one for the beech trees and one for the pine trees.
 
 ```{r, eval = F}
 sch_ord_soil_plots <- phyloseq::subset_samples(phy_sch_ord_top25_named_plot, substrate == "soil") %>% 
@@ -1185,10 +1185,11 @@ sch_ord_bark_plots
 
 # 12. Differences in community composition/beta diversity between bark and soil
 
-We can see from the previous plots that there are differences between tree species and substrates. But are they really meaningful or is it just something we can visually distinguish but is not statistically significant?
+We can see from the previous plots that there are differences between tree species and substrates. We don't know yet if they are really meaningful (i.e. statistically significant), or if just a trend/pattern that we can visually distinguish.
 
-But first let us look at another method to visually represent differences between groups: Ordination. 
-Ordinations are based on a distance measure between samples and groups. The distance measure indicates how different the trees are in the abundance and number of the ASVs. A common measure that we are going to use here is Bray-Curtis dissimilarity. It looks at abundances of taxa that two samples share and the number found in each sample. If both samples share the same number of ASVs, with the same abundance, the dissimilarity will be zero. We can than ordinate the samples with an approach called Non-Metric Multidimensional Scaling. This approach ranks how dissimilar samples are to each other and plots them in a 2D space.
+Before we get an answer to that question, however, first let's look at another method to visually represent differences between groups: Ordination. 
+
+Ordinations are based on a distance metric between samples and groups. The distance measure indicates how different the trees are in the abundance and number of ASVs. A common measure that we are going to use here is Bray-Curtis dissimilarity, which looks at the abundances of taxa shared by two samples and the number of taxa found in each sample. If both samples share the same number of ASVs, with the same abundances, the dissimilarity (distance) will be zero. We can than ordinate the samples with an approach called Non-Metric Multidimensional Scaling. This approach ranks how dissimilar samples are to each other and plots them in a 2D space.
 
 ```{r, eval = F}
 # Ordinate the Schorfheide-Chorin phyloseq using an NMDS with Bray-Curtis distance.
@@ -1222,7 +1223,7 @@ ordination_sch_substrate
 
 ```
 
-With the dissimilarity/distance measure we can now also test if our groups (tree species & substrate) are really different statistically. To do so we run an analysis called PERMANOVA: a permutational multivariate analysis of variance. It works in a way that it decomposes the dissimilarity matrix into variation within and between the groups. 
+With the dissimilarity/distance measure we can now also test if our groups (tree species & substrate) are really different statistically. To do so we will run a PERMANOVA: a permutational multivariate analysis of variance. This will decompose the dissimilarity matrix into variation within and between the groups we are interested in. 
 
 ```{r, eval = F}
 # We need to calculate a distance matrix first.
@@ -1236,7 +1237,8 @@ vegan::adonis2(bray_mat_sch ~ factor(phyloseq::sample_data(physeq_sch)$substrate
 
 ```
 
-PERMANOVA results might have been confounded if the groups have very different distributions around there centers. So to see if our results are reliable we have to test these dispersions.  
+PERMANOVA results might be confounded if the groups were to have very different distributions around their centers. In order to see if our results are reliable, we therefore have to look at the dispersion.  
+
 ```{r, eval = F}
 # Test the within group dispersion for the substrate.
 dispr_substrate_sch <- vegan::betadisper(bray_mat_sch, 
