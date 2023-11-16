@@ -978,9 +978,9 @@ rare_sch
 
 # 10. Alpha Diversity
 
-A first interesting diversity question might be if substrates or tree species differ in their number of species (richness) or diversity (e.g. Shannon diversity). We can easily calculate both measures with build-in phyloseq functions and then visually compare them with simple boxplots. 
+A first interesting diversity question might be if substrates or tree species differ in their number of species (richness) or diversity (e.g. Shannon diversity index). We can easily calculate both of these measures with the build-in phyloseq functions and then visually compare them with simple boxplots. 
 
-First we calculate the diversity measures and add them to the phyloseq object so we have all other sample information as well
+First, we calculate the diversity measures and add them to the phyloseq object so that we have access to all other sample information as well.
 ```{r, eval = F}
 # Calculate the diversity measures.
 div_fun <- estimate_richness(phy_fungi_sch, split = T, measures = c('Observed, 'Shannon')
@@ -992,7 +992,7 @@ phy_fungi <- merge_phyloseq(phy_fungi, new_var_fun)
 fungi_sampledata <- sample_data(phy_fungi)
 ```
 
-Now we can use the data to create several boxplots. First we look at the differences in tree species.
+Now we can use the data to create several boxplots. First, we will look at the differences in tree species.
 ```{r, eval = F}
 fun_box_tree_shannon <- ggplot(fungi_sampledata, aes(x = dominant_tree, y = Shannon, fill = dominant_tree, colour = dominant_tree)) + 
   geom_boxplot(
@@ -1014,7 +1014,7 @@ fun_box_tree_richness <- ggplot(fungi_sampledata, aes(x = dominant_tree, y = Sha
   )
 fun_box_tree_richness  
 ```  
-And we can also look at the differences between substrates.
+We can also look at the differences between substrates.
 ```{r, eval = F}
 fun_box_substrate_shannon <- ggplot(fungi_sampledata, aes(x = substrate, y = Shannon, fill = substrate, colour = substrate)) + 
   geom_boxplot(
@@ -1036,14 +1036,14 @@ fun_box_substrate_richness <- ggplot(fungi_sampledata, aes(x = substrate, y = Sh
   )
 fun_box_substrate_richness  
 ```
-> :memo: **Question 27:** What differences can you see? 
+> :memo: **Question 27:** What differences can you see? Does host species or substrate have a greater effect on species richness or diversity?
 
   
 # 11. Community Composition
 
-Some of the fundamental questions in community ecology is: Which taxa occur in my dataset? And more specific in each sample? And are their differences? 
+Some fundamental questions in community ecology are: Which taxa occur in a particular dataset? Which taxa are more specific (e.g. unique to) each sample? And are there differences? 
 
-To get a first idea of this we can create a so-called community composition bar plot. It gives us a visual representation of what is in our sample and does one group occur more often then another. We plot this visualization on the taxonomic level of "Order", because it would be impossible to tell differences otherwise.
+To get a first clue as to the answer to these questions, we can create a community composition bar plot. This will give us a visual representation of what is in our sample, and whether or not one group occurs more often than another. We plot this visualization at the "Order" taxonomic level, because we would not have enough information to resolve differences otherwise.
 
 For this purpose we need to transform our read counts into relative abundance (the proportion of how often a taxon occurs in the data) and find the 25 most abundant orders. 
 
