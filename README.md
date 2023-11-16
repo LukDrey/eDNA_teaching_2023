@@ -983,7 +983,7 @@ A first interesting diversity question might be if substrates or tree species di
 First, we calculate the diversity measures and add them to the phyloseq object so that we have access to all other sample information as well.
 ```{r, eval = F}
 # Calculate the diversity measures.
-div_fun <- estimate_richness(phy_fungi_sch, split = T, measures = c('Observed, 'Shannon')
+div_fun <- estimate_richness(phy_fungi_sch, split = T, measures = c('Observed', 'Shannon'))
 
 # Make a new sample_data object and merge with existing phyloseq object.
 new_var_fun <- sample_data(div_fun)
