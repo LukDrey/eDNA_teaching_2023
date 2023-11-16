@@ -1026,7 +1026,7 @@ fun_box_substrate_shannon <- ggplot(fungi_sampledata, aes(x = substrate, y = Sha
   )
 fun_box_substrate_shannon  
 
-fun_box_substrate_richness <- ggplot(fungi_sampledata, aes(x = substrate, y = Shannon, fill = substrate, colour = substrate)) + 
+fun_box_substrate_richness <- ggplot(fungi_sampledata, aes(x = substrate, y = Observed, fill = substrate, colour = substrate)) + 
   geom_boxplot(
     width = .15, 
     ## remove outliers
