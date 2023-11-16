@@ -987,9 +987,9 @@ div_fun <- estimate_richness(physeq_sch, split = T, measures = c('Observed', 'Sh
 
 # Make a new sample_data object and merge with existing phyloseq object.
 new_var_fun <- sample_data(div_fun)
-phy_fungi <- merge_phyloseq(phy_fungi, new_var_fun)
+physeq_sch <- merge_phyloseq(physeq_sch, new_var_fun)
 
-fungi_sampledata <- sample_data(phy_fungi)
+fungi_sampledata <- sample_data(physeq_sch)
 ```
 
 Now we can use the data to create several boxplots. First, we will look at the differences in tree species.
